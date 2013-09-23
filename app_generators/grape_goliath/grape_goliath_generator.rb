@@ -1,4 +1,6 @@
 class GrapeGoliathGenerator < RubiGen::Base
+  class FileInTheWay < StandardError
+  end
 
   DEFAULT_SHEBANG = File.join(Config::CONFIG['bindir'],
                               Config::CONFIG['ruby_install_name'])
@@ -12,6 +14,11 @@ class GrapeGoliathGenerator < RubiGen::Base
     usage if args.empty?
     @destination_root = File.expand_path(args.shift)
     @name = base_name
+    unless File.exist?(@destination_root)
+      $stdout.puts "Creating goliath application under the directory #{@name}"
+    else
+      raise FileInTheWay, "The directory #{@name} already exists, aborting. Maybe move it out of the way before continuing?"
+    end    
     extract_options
   end
 
@@ -20,6 +27,7 @@ class GrapeGoliathGenerator < RubiGen::Base
       # Ensure appropriate folder(s) exists
       m.directory ''
       BASEDIRS.each { |path| m.directory path }
+      # Create stubs
       m.file     "Gemfile",   "Gemfile"
       m.file     "Gemfile.lock",   "Gemfile.lock"
       m.file     "Procfile",  "Procfile"
@@ -27,7 +35,6 @@ class GrapeGoliathGenerator < RubiGen::Base
       m.file     "application.rb",  "config/application.rb"
       m.file     "database.yml",  "config/database.yml"
       m.file     "server.rb",  "server.rb"
-      # Create stubs
       # m.template "template.rb",  "some_file_after_erb.rb"
       # m.template_copy_each ["template.rb", "template2.rb"]
       # m.file     "file",         "some_file_copied"

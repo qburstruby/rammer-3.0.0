@@ -20,7 +20,7 @@ Make sure to install following gems first before grape_goliath installation
 	
  * grape_goliath application_name
  * cd application_name
- * bundle install 	(To install al dependencies)
+ * bundle install 	(To install all dependencies)
  * ruby server.rb -vs 	(To run the Goliath server)
 
 == Comments/Requests

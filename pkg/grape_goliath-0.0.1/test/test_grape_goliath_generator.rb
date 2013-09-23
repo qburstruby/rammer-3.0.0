@@ -26,9 +26,12 @@ class TestGrapeGoliathGenerator < Test::Unit::TestCase
   #   bare_teardown - place this in teardown method to destroy the TMP_ROOT or APP_ROOT folder after each test
 
   def test_generator_without_options
-    run_generator('grape_goliath', [APP_ROOT], sources)
-    assert_directory_exists "path/to/included/folder"
-    assert_generated_file   "path/to/included/folder/some_file"
+    generator = run_generator('grape_goliath', ["/home/user/grape_goliath/test/tmp/project"], sources)
+    expected_root = "/home/user/grape_goliath/test/tmp/project"
+    assert_equal(expected_root, generator.destination_root)
+    assert_directory_exists "/home/user/grape_goliath/test/tmp/project/app"
+    # assert_generated_file "db"
+    # assert_generated_file "config"
   end
 
   private

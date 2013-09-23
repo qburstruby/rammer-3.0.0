@@ -25,10 +25,25 @@ class TestGrapeGoliathGenerator < Test::Unit::TestCase
   #   bare_setup - place this in setup method to create the APP_ROOT folder for each test
   #   bare_teardown - place this in teardown method to destroy the TMP_ROOT or APP_ROOT folder after each test
 
-  def test_generator_without_options
-    run_generator('grape_goliath', [APP_ROOT], sources)
-    assert_directory_exists "path/to/included/folder"
-    assert_generated_file   "path/to/included/folder/some_file"
+  def test_generator_root_directory
+    generator = run_generator('grape_goliath', ["/home/user/grape_goliath/test/tmp/project"], sources)
+    expected_root = "/home/user/grape_goliath/test/tmp/project"
+    assert_equal(expected_root, generator.destination_root)
+  end
+  def test_generator_application_files
+    generator = run_generator('grape_goliath', ["/home/user/grape_goliath/test/tmp/project"], sources)
+    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/app"))
+    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/db"))
+    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/config"))
+    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/app/models"))
+    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/config/database.yml"))
+    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/config/application.rb"))
+    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/Gemfile"))
+    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/db/migrate"))
+    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/Gemfile.lock"))
+    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/Procfile"))
+    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/Rakefile"))
+    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/server.rb"))
   end
 
   private

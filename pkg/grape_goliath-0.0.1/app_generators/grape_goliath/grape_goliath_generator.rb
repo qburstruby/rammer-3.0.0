@@ -1,4 +1,6 @@
 class GrapeGoliathGenerator < RubiGen::Base
+  class FileInTheWay < StandardError
+  end
 
   DEFAULT_SHEBANG = File.join(Config::CONFIG['bindir'],
                               Config::CONFIG['ruby_install_name'])
@@ -12,6 +14,11 @@ class GrapeGoliathGenerator < RubiGen::Base
     usage if args.empty?
     @destination_root = File.expand_path(args.shift)
     @name = base_name
+    unless File.exist?(@destination_root)
+      $stdout.puts "Creating goliath application under the directory #{@name}"
+    else
+      raise FileInTheWay, "The directory #{@name} already exists, aborting. Maybe move it out of the way before continuing?"
+    end    
     extract_options
   end
 
