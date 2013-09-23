@@ -1,0 +1,75 @@
+= grape_goliath
+
+* http://github.com/qburstruby/grape_goliath
+
+== DESCRIPTION:
+
+'grape_goliath' is a gem which creates an application with tree structure specified for a Goliath application having Grape API framework.
+
+== INSTALL:
+
+* sudo gem install grape_goliath
+
+== REQUIREMENT:
+
+Make sure to install following gems first before grape_goliath installation
+	* newgem
+	* hoe
+
+== USAGE:
+	
+ * grape_goliath application_name
+ * cd application_name
+ * bundle install 	(To install all dependencies)
+ * ruby server.rb -vs 	(To run the Goliath server)
+
+== Comments/Requests
+
+If anyone has comments or questions please let me know (qbruby@qburst.com).
+If you have updates or patches or want to contribute I would love to see what you have or want to add.
+
+
+== Note on Patches/Pull Requests
+
+* Fork the project.
+* Make your feature addition or bug fix.
+* Add tests for it. This is important so I don't break it in a future version unintentionally.
+* Send me a pull request. Bonus points for topic branches.
+
+
+== Contributers
+
+This list is open to all. You are all welcome :).
+
+* manishaharidas (Manisha Haridas) - 
+  * Github: https://github.com/manishaharidas
+
+* anandqbnrd (Anand Ponnappan) -
+  * Github: https://github.com/anandqbnrd
+
+Copyright (c) 2013 QBurst(qbruby@qburst.com)
+
+== LICENSE:
+
+(The MIT License)
+
+Copyright (c) 2013 FIXME full name
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
