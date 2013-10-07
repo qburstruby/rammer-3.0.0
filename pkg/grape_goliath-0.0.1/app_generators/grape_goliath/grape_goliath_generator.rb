@@ -27,6 +27,7 @@ class GrapeGoliathGenerator < RubiGen::Base
       # Ensure appropriate folder(s) exists
       m.directory ''
       BASEDIRS.each { |path| m.directory path }
+      # Create stubs
       m.file     "Gemfile",   "Gemfile"
       m.file     "Gemfile.lock",   "Gemfile.lock"
       m.file     "Procfile",  "Procfile"
@@ -34,7 +35,6 @@ class GrapeGoliathGenerator < RubiGen::Base
       m.file     "application.rb",  "config/application.rb"
       m.file     "database.yml",  "config/database.yml"
       m.file     "server.rb",  "server.rb"
-      # Create stubs
       # m.template "template.rb",  "some_file_after_erb.rb"
       # m.template_copy_each ["template.rb", "template2.rb"]
       # m.file     "file",         "some_file_copied"

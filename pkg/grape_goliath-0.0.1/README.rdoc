@@ -12,12 +12,15 @@
 
 == REQUIREMENT:
 
-Make sure to install following gems first before grape_goliath installation
+Make sure to install the following gems first before installing grape_goliath gem:
+
+
 	* newgem
 	* hoe
 
 == USAGE:
 	
+ * gem install newgem
  * grape_goliath application_name
  * cd application_name
  * bundle install 	(To install all dependencies)
