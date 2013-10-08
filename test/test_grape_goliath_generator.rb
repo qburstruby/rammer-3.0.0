@@ -11,25 +11,30 @@ class TestGrapeGoliathGenerator < Test::Unit::TestCase
     bare_teardown
   end
 
-  def test_generator_root_directory
-    generator = run_generator('grape_goliath', ["/home/user/grape_goliath/test/tmp/project"], sources)
-    expected_root = "/home/user/grape_goliath/test/tmp/project"
+  def test_generator_root_directory    
+    dir_path = Dir.getwd
+    FileUtils.rm_r "#{dir_path}/test/dummy" if File.directory?("#{dir_path}/test/dummy")
+    generator = run_generator('grape_goliath', ["#{dir_path}/test/dummy"], sources)
+    expected_root = "#{dir_path}/test/dummy"    
     assert_equal(expected_root, generator.destination_root)
   end
-  def test_generator_application_files
-    generator = run_generator('grape_goliath', ["/home/user/grape_goliath/test/tmp/project"], sources)
-    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/app"))
-    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/db"))
-    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/config"))
-    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/app/models"))
-    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/config/database.yml"))
-    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/config/application.rb"))
-    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/Gemfile"))
-    assert_equal(true, File.directory?("/home/user/grape_goliath/test/tmp/project/db/migrate"))
-    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/Gemfile.lock"))
-    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/Procfile"))
-    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/Rakefile"))
-    assert_equal(true, File.file?("/home/user/grape_goliath/test/tmp/project/server.rb"))
+  
+  def test_generator_application_files    
+    dir_path = Dir.getwd
+    FileUtils.rm_r "#{dir_path}/test/test_folder" if File.directory?("#{dir_path}/test/test_folder")
+    generator = run_generator('grape_goliath', ["#{dir_path}/test/test_folder"], sources)
+    assert_equal(true, File.directory?("#{dir_path}/test/test_folder/app"))
+    assert_equal(true, File.directory?("#{dir_path}/test/test_folder/db"))
+    assert_equal(true, File.directory?("#{dir_path}/test/test_folder/config"))
+    assert_equal(true, File.directory?("#{dir_path}/test/test_folder/app/models"))
+    assert_equal(true, File.file?("#{dir_path}/test/test_folder/config/database.yml"))
+    assert_equal(true, File.file?("#{dir_path}/test/test_folder/config/application.rb"))
+    assert_equal(true, File.file?("#{dir_path}/test/test_folder/Gemfile"))
+    assert_equal(true, File.directory?("#{dir_path}/test/test_folder/db/migrate"))
+    assert_equal(true, File.file?("#{dir_path}/test/test_folder/Gemfile.lock"))
+    assert_equal(true, File.file?("#{dir_path}/test/test_folder/Procfile"))
+    assert_equal(true, File.file?("#{dir_path}/test/test_folder/Rakefile"))
+    assert_equal(true, File.file?("#{dir_path}/test/test_folder/server.rb"))
   end
 
   private
