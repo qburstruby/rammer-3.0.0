@@ -16,6 +16,7 @@ Make sure to install the following gems first before installing grape_goliath ge
 
 
 	* newgem
+	
 	* hoe
 
 == USAGE:
