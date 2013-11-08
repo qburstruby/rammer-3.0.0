@@ -1,0 +1,86 @@
+#!/usr/bin/env ruby
+
+require 'grape_goliath'
+
+def parse_options
+    case ARGV[1]
+    when "-plugin"
+        return true
+    when "-unplug"
+        return true
+    end
+end
+
+def options_message
+STDOUT.puts <<-EOF
+Please include module name
+
+Usage:
+  gog module #{ARGV[1]}
+
+  options:
+    authentication 
+    authorization 
+    oauth
+
+  sub_option for oauth module:
+    redirect_url  
+EOF
+end
+
+def include_module(module_name)
+    target_dir = Dir.pwd.split('/',Dir.pwd.count('/')+1).last
+    name = target_dir.split.map(&:capitalize)*' '
+case module_name
+when "authentication"
+    module_class = "::#{name}::AuthenticationApis"
+when "authorization"
+    module_class = "::#{name}::AuthorizationApis"
+when "oauth"
+    module_class = "::#{name}::OauthApis"
+end
+options = {:target_dir => target_dir, :module_class => module_class, :module_name => module_name}
+module_generator = GrapeGoliath::ModuleGenerator.new(options)
+module_generator.run
+end
+
+def mount_module
+case ARGV[2]
+when "authentication"
+    include_module("authentication")
+    return true
+when "authorization"
+    include_module("authorization")
+    return true
+when "oauth"
+    if ARGV[3]
+        include_module("oauth")
+        $redirect_url = ARGV[3]
+        return true
+    else
+        options_message
+        exit
+    end
+end
+
+end
+
+case ARGV[0]
+when "module"
+    unless mount_module
+        if ARGV[1] && parse_options 
+           options_message 
+        else
+            STDOUT.puts <<-EOF
+Please provide command options
+
+Usage:
+  gog module 
+
+  options:
+    -plugin
+    -unplug
+EOF
+end
+end
+end

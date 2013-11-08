@@ -2,5 +2,5 @@
 
 require 'grape_goliath'
 
-chatter = GrapeGoliath::Generator.new(*ARGV)
-chatter.run
+generator = GrapeGoliath::Generator.new(*ARGV)
+generator.run
