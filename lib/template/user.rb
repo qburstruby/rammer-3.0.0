@@ -2,6 +2,10 @@ class User < ActiveRecord::Base
 
   def self.validate_params?(params,base_api)
 		case(base_api)
+			when "register"
+				if params.name && params.redirect_uri
+					return true if User.valid_redirect_uri?(params.redirect_uri)
+				end
 			when "sign_up", "sign_in"
 				if params.email && params.password && params.redirect_uri
 					return true if User.valid_email?(params.email) && User.valid_password?(params.password) && User.valid_redirect_uri?(params.redirect_uri)

@@ -1,8 +1,8 @@
 require "grape_goliath/version"
 require 'fileutils'
+
 module GrapeGoliath
-  	class FileInTheWay < StandardError
-  	end
+
   	class Generator
 	  	attr_accessor :target_dir, :project_name, :module_name
         BASE_DIR = ['app', 'app/apis', 'config', 'db', 'db/migrate', 'app/models']          
@@ -31,9 +31,9 @@ module GrapeGoliath
 	        setup_api_module
 	        copy_files_to_dir 'application.rb','config'
 	        copy_files_to_dir 'database.yml','config'
-	        puts "\e[33mRun `bundle install` to install missing gems.\e[0m"
+	        $stdout.puts "\e[33mRun `bundle install` to install missing gems.\e[0m"
 	      else
-	        raise FileInTheWay, "The directory #{target_dir} already exists, aborting. Maybe move it out of the way before continuing?"
+	       	$stdout.puts "\e[1;31mError:\e[0m The directory #{target_dir} already exists, aborting. Maybe move it out of the way before continuing."
 	      end
 	    end
 
@@ -42,14 +42,14 @@ module GrapeGoliath
 	    def create_base_dirs
 	    	BASE_DIR.each do |dir|
 	    		FileUtils.mkdir "#{target_dir}/#{dir}"
-	    		$stdout.puts "\tcreate\t/#{dir}"
+	    		$stdout.puts "\e[1;32m \tcreate\e[0m\t#{dir}"
 	    	end
 	    	FileUtils.mkdir "#{target_dir}/app/apis/#{target_dir}"
-	    	$stdout.puts "\tcreate\t/app/apis/#{target_dir}"
+	    	$stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{target_dir}"
 	    end
 
 	    def setup_api_module
-	    	self.module_name = target_dir.split.map(&:capitalize).join(' ')
+	    	self.module_name = target_dir.split('_').map(&:capitalize).join('')
 	    	create_api_module
 	    	config_server
 	    end
@@ -60,7 +60,7 @@ module GrapeGoliath
 	    		f.puts(module_name)
 	    		f.write("\tclass Base < Grape::API\n\tend\nend")
 	    	end
-	    	$stdout.puts "\tcreate\t/app/apis/#{target_dir}/base.rb"
+	    	$stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{target_dir}/base.rb"
 	    end
 
 	    def config_server
@@ -77,25 +77,25 @@ module GrapeGoliath
 		            return
 		        end
 			end
-			$stdout.puts "\tconfig\t/server.rb"
+			$stdout.puts "\e[1;32m \tcreate\e[0m\tserver.rb"
 	    end
 
 	    def copy_files_to_target
 	    	TEMPLATE_FILES.each do |file|
 	    		source = File.join("grape_goliath/lib/template/",file)
 		    	FileUtils.cp(source,"#{target_dir}")
-		        $stdout.puts "\tcreate\t/#{file}"
+		        $stdout.puts "\e[1;32m \tcreate\e[0m\t#{file}"
 		    end
 	    end
 
 	    def copy_files_to_dir(file,destination)
 	    	FileUtils.cp("grape_goliath/lib/template/#{file}","#{target_dir}/#{destination}")
-	        $stdout.puts "\tcreate\t/#{destination}/#{file}"
+	        $stdout.puts "\e[1;32m \tcreate\e[0m\t#{destination}/#{file}"
 	    end
   	end
 
   	class ModuleGenerator
-	  	attr_accessor :target_dir, :module_class, :options, :module_name, :gem_path
+	  	attr_accessor :target_dir, :module_class, :options, :module_name, :gem_path, :action
 	  	AUTH_MIGRATE = ['01_create_users.rb','02_create_sessions.rb']
 	    OAUTH_MIGRATE = ['03_create_owners.rb', '04_create_oauth2_authorizations.rb', '05_create_oauth2_clients.rb']
 	    AUTH_MODELS = ['user.rb', 'session.rb', 'oauth2_authorization.rb']
@@ -105,12 +105,28 @@ module GrapeGoliath
 	  		self.target_dir = options[:target_dir]
 	  		self.module_class = options[:module_class]
 	  		self.module_name = options[:module_name]
+	  		self.action = options[:action]
 	  		path = `gem which grape_goliath`
 	  		self.gem_path = path.split("/.rvm",2).first
 	  	end
 
 	  	def run
-	  		file = File.open("#{Dir.pwd}/app/apis/#{target_dir}/base.rb", "r+")
+	  		case action
+	  		when "-p","-plugin"
+		  		flag = require_module_to_base
+		  		mount_module unless flag
+				copy_module
+				create_migrations
+				copy_model_files
+				add_gems
+			when "-u","-unplug"
+				unmount_module
+			end
+			return oauth_message if module_name == "oauth" && (action == "-p" || action == "-plugin")
+		end
+
+		def mount_module
+			file = File.open("#{Dir.pwd}/app/apis/#{target_dir}/base.rb", "r+")
 			file.each do |line|
 			    while line == "\tclass Base < Grape::API\n" do
 			        pos = file.pos
@@ -122,14 +138,17 @@ module GrapeGoliath
 			        break
 			    end
 			end
-			$stdout.puts "\tmounted\t #{module_class}"
-			require_module_to_base
-			copy_module
-			create_migrations
-			copy_model_files
+			$stdout.puts "\e[1;35m\tmounted\e[0m\t#{module_class}"
 		end
 
 		def require_module_to_base
+			file = File.open("#{Dir.pwd}/app/apis/#{target_dir}/base.rb", "r+")
+	  		file.each do |line|
+	  			while line == "require_relative './modules/#{module_name}_apis'\n" do
+	  				$stdout.puts "\e[33mModule already mounted.\e[0m"
+	  				return true
+	  			end
+	  		end
 			File.open("#{Dir.pwd}/app/apis/#{target_dir}/base.rb", "r+") do |f|	
 				pos = f.pos		
 				rest = f.read
@@ -139,6 +158,7 @@ module GrapeGoliath
 		        f.write("_apis'\n")
 		        f.write(rest)
 			end
+			return false
 		end
 
 		def copy_module		
@@ -148,8 +168,7 @@ module GrapeGoliath
 			FileUtils.mkdir dest unless File.exists?(dest)
 			FileUtils.cp(src,dest) unless presence
 			configure_module_files
-			$stdout.puts "\tcreate\t/#{target_dir}/modules/#{module_name}/#{module_name}_apis.rb" unless presence
-			add_gems
+			$stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{target_dir}/modules/#{module_name}_apis.rb" unless presence
 	  	end
 
 	  	def create_migrations
@@ -164,7 +183,7 @@ module GrapeGoliath
 	  				presence = File.exists?("#{dest}/#{file}")? true : false
 	  				unless presence
 		  				FileUtils.cp("#{src}/#{file}",dest)
-		  				$stdout.puts "\tcreate\t#{dest}/#{file}"
+		  				$stdout.puts "\e[1;32m \tcreate\e[0m\tdb/migrate/#{file}"
 	  				end
 	  			end
 	  		end
@@ -175,7 +194,7 @@ module GrapeGoliath
   				presence = File.exists?("#{dest}/#{file}")? true : false
   				unless presence
 	  				FileUtils.cp("#{src}/#{file}",dest)
-	  				$stdout.puts "\tcreate\t#{dest}/#{file}"
+	  				$stdout.puts "\e[1;32m \tcreate\e[0m\tdb/migrate/#{file}"
   				end
   			end
 	  	end
@@ -185,7 +204,7 @@ module GrapeGoliath
   				presence = File.exists?("#{dest}/#{file}")? true : false
   				unless presence
 	  				FileUtils.cp("#{src}/#{file}",dest)
-	  				$stdout.puts "\tcreate\t#{dest}/#{file}"
+	  				$stdout.puts "\e[1;32m \tcreate\e[0m\tapp/models/#{file}"
   				end
   			end
 	  	end
@@ -202,7 +221,7 @@ module GrapeGoliath
 	  				presence = File.exists?("#{dest}/#{file}")? true : false
 	  				unless presence
 		  				FileUtils.cp("#{src}/#{file}",dest)
-		  				$stdout.puts "\tcreate\t#{dest}/#{file}"
+		  				$stdout.puts "\e[1;32m \tcreate\e[0m\tapp/models/#{file}"
 	  				end
 	  			end
 	  		end
@@ -210,7 +229,7 @@ module GrapeGoliath
 
 	  	def configure_module_files
 	  		file = File.read("#{Dir.pwd}/app/apis/#{target_dir}/modules/#{module_name}_apis.rb")
-	  		replace = file.gsub(/module GrapeGoliath/, "module #{target_dir.split.map(&:capitalize)*' '}")
+	  		replace = file.gsub(/module GrapeGoliath/, "module #{target_dir.split('_').map(&:capitalize)*''}")
 	  		File.open("#{Dir.pwd}/app/apis/#{target_dir}/modules/#{module_name}_apis.rb", "w"){|f|
 	  			f.puts replace
 	  		}
@@ -224,10 +243,42 @@ module GrapeGoliath
 	  			end
 	  		end
 	  		File.open("#{Dir.pwd}/Gemfile", "a+") do |f|
-	  			f.write("gem 'multi_json'\ngem 'oauth2'\ngem 'songkick-oauth2-provider'\ngem 'ruby_regex'")
+	  			f.write("gem 'multi_json'\ngem 'oauth2'\ngem 'songkick-oauth2-provider'\ngem 'ruby_regex'\ngem 'oauth'\n")
 	  		end
-  			$stdout.puts "\tGemfile\tgem 'multi_json'\n\t\tgem 'oauth2'
-\t\tgem 'songkick-oauth2-provider'\n\t\tgem 'ruby_regex'"
+  			$stdout.puts "\e[1;35m \tGemfile\e[0m\tgem 'multi_json'\n\t\tgem 'oauth2'
+\t\tgem 'songkick-oauth2-provider'\n\t\tgem 'ruby_regex'\n\t\tgem 'oauth'\n"
+			$stdout.puts "\e[1;32m \trun\e[0m\tbundle install"
+			system("bundle install")
+	  	end
+
+	  	def unmount_module
+	  		temp_file = "#{Dir.pwd}/app/apis/#{target_dir}/tmp.rb"
+	  		source = "#{Dir.pwd}/app/apis/#{target_dir}/base.rb"
+	  		delete_file = "#{Dir.pwd}/app/apis/#{target_dir}/modules/#{module_name}_apis.rb"
+	  		File.open(temp_file, "w") do |out_file|
+	  			File.foreach(source) do |line|
+	  				unless line == "require_relative './modules/#{module_name}_apis'\n"
+    					out_file.puts line unless line == "\t\tmount #{module_class}\n"
+    				end
+  				end
+  				FileUtils.mv(temp_file, source)
+  			end
+  			if File.exists?(delete_file)
+	  			FileUtils.rm(delete_file) 
+	  			$stdout.puts "\e[1;35m\tunmounted\e[0m\t#{module_class}" 
+	  			$stdout.puts "\e[1;31m\tdelete\e[0m\t\tapp/apis/#{target_dir}/modules/#{module_name}_apis.rb" 
+	  		else
+	  			$stdout.puts "\e[33mModule already unmounted.\e[0m"
+	  		end
+	  	end
+
+	  	def oauth_message
+$stdout.puts "\e[33m
+In app/apis/<APP_NAME>/modules/oauth_apis.rb
+	Specify redirection url to the respective authorization page into 'redirect_to_url'
+and uncomment the code to enable /oauth/authorize endpoint functionality.
+
+\e[0m"
 	  	end
   	end
 end

@@ -1,5 +1,24 @@
 class Oauth2Client < ActiveRecord::Base
 	has_many :oauth2_authorizations
+  attr_accessible :name, :client_id, :client_secret_hash, :redirect_uri
+  validates_presence_of :name, :client_id, :client_secret_hash, :redirect_uri
+  validates_uniqueness_of :client_id
+
+  before_validation :generate_keys, :on => :create
+
+  def self.register(params)
+    if @client = Oauth2Client.find_by_name(params.name)
+      error = "Client already exists."
+      error_message = Oauth2Authorization.error_response(error)
+      return error_message, false
+    else
+      @oauth2_client = Oauth2Client.create!(params)          
+      string = "#{@oauth2_client.client_id}:#{@oauth2_client.client_secret_hash}"
+      @oauth2_client.update_attribute(:basic_code, Base64.encode64(string))
+      redirect_url = @oauth2_client.redirect_to_url
+      return redirect_url, true
+    end
+  end
 
 	def self.valid_authorization?(params)
 		authorization_decoded = Base64.decode64(params.authorization)  	
@@ -65,5 +84,17 @@ class Oauth2Client < ActiveRecord::Base
         return error_message, false  
       end
     end
+  end
+
+  def redirect_to_url
+    return self.redirect_uri + "?client_id=#{self.client_id}&client_secret_hash=#{self.client_secret_hash}
+          &redirect_uri=#{self.redirect_uri}&authorization=#{self.basic_code}"
+  end
+
+  protected
+
+  def generate_keys
+    self.client_id = OAuth::Helper.generate_key(40)[0,40]
+    self.client_secret_hash = OAuth::Helper.generate_key(40)[0,40]
   end
 end

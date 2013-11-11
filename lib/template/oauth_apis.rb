@@ -1,36 +1,61 @@
 require 'oauth2'
 require 'songkick/oauth2/provider'
+require 'oauth'
+require 'ruby_regex'
 module GrapeGoliath 
    
     class OauthApis < Grape::API
     	Songkick::OAuth2::Provider.realm = 'PocketAPI Oauth Server'
         version 'v1', :using => :path
         format :json
-# =begin
-# This handles api calls for request token generation with the request parameters:
-# {"client_id"=> Client's registered ID,
-#  "username" => Authorized user's session id,
-#  "redirect_uri" => URL to which the oauth should be redirected,
-#  "response_type" => "code" (Keyword to return request token)
-#  }
-# =end
-# 	        [:get, :post].each do |method|
-# 	  		  	__send__ method, '/oauth/authorize' do
-# 	  		  		if User.validate_params?(params,"authorize")
-# 				  		if User.logged_in?(params)
-# 				  			@oauth2 = Songkick::OAuth2::Provider.parse(@owner, env) 
-# 				  			redirect_to_url = "http://invokevokeangular.qburst.com:4000/grantaccess/#{@oauth2.client.name}/#{@oauth2.client.client_id}/#{params.username}" 
-# 				  			redirect redirect_to_url
-# 						else
-# 							error = "Sign in first."
-# 							Oauth2Authorization.error_response(error)	
-# 						end
-# 					else
-# 	  		  			error = "Params missing or invalid."
-# 						Oauth2Authorization.error_response(error)
-# 					end		
-# 			  	end
-# 			end
+
+=begin
+This handles api calls for request token generation with the request parameters:
+{"name"=> Client's name,
+ "redirect_uri" => URL to which the oauth should be redirected
+ }
+=end
+     		[:get, :post].each do |method|
+	  		  	__send__ method, '/oauth/register_client' do
+	  		  		if User.validate_params?(params,"register")
+	  		  			expected_response,response_message = Oauth2Client.register(params)
+				  		if response_message then redirect expected_response else expected_response end
+					else
+	  		  			error = "Parameters missing or invalid."
+						Oauth2Authorization.error_response(error)
+					end		
+			  	end
+			end   
+=begin
+This handles api calls for request token generation with the request parameters:
+{"client_id"=> Client's registered ID,
+ "username" => Authorized user's session id,
+ "redirect_uri" => URL to which the oauth should be redirected,
+ "response_type" => "code" (Keyword to return request token)
+ }
+=end
+	        [:get, :post].each do |method|
+	  		  	__send__ method, '/oauth/authorize' do
+=begin
+Specify redirection url to the respective authorization page into 'redirect_to_url'
+and uncomment the following code to enable functionality.
+
+	  		  		if User.validate_params?(params,"authorize")
+				  		if User.logged_in?(params)
+				  			@oauth2 = Songkick::OAuth2::Provider.parse(@owner, env)
+				  			redirect_to_url = "Redirection url to authorization page" 
+				  			redirect redirect_to_url
+						else
+							error = "Sign in first."
+							Oauth2Authorization.error_response(error)	
+						end
+					else
+	  		  			error = "Parameters missing or invalid."
+						Oauth2Authorization.error_response(error)
+					end
+=end		
+			  	end			  
+			end
 =begin
 This handles api calls for access token generation with the request parameters:
 {"client_id"=> Client's registered ID,
@@ -50,7 +75,7 @@ This handles api calls for access token generation with the request parameters:
 						Oauth2Authorization.error_response(error)	
 					end
 				else
-  		  			error = "Params missing or invalid."
+  		  			error = "Parameters missing or invalid."
 					Oauth2Authorization.error_response(error)
 				end
 		  	end
