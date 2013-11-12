@@ -231,7 +231,7 @@ module Rammer
 
 	  	def configure_module_files
 	  		file = File.read("#{Dir.pwd}/app/apis/#{target_dir}/modules/#{module_name}_apis.rb")
-	  		replace = file.gsub(/module GrapeGoliath/, "module #{target_dir.split('_').map(&:capitalize)*''}")
+	  		replace = file.gsub(/module Rammer/, "module #{target_dir.split('_').map(&:capitalize)*''}")
 	  		File.open("#{Dir.pwd}/app/apis/#{target_dir}/modules/#{module_name}_apis.rb", "w"){|f|
 	  			f.puts replace
 	  		}
