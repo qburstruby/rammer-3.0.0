@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'rammer'
+
+generator = Rammer::Generator.new(*ARGV)
+generator.run
