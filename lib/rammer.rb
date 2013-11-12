@@ -1,6 +1,6 @@
 require "rammer/version"
 require 'fileutils'
-
+$gem_file_name = "rammer-"+Rammer::VERSION
 module Rammer
 
   	class Generator
@@ -21,7 +21,7 @@ module Rammer
 		    end
 		    self.target_dir  =  self.project_name
 		    path = `gem which rammer`
-	  		self.gem_path = path.split("/.rvm",2).first
+	  		self.gem_path = path.split($gem_file_name,2).first
 		end
 
 	    def run
@@ -84,14 +84,14 @@ module Rammer
 
 	    def copy_files_to_target
 	    	TEMPLATE_FILES.each do |file|
-	    		source = File.join("#{gem_path}/rammer/lib/template/",file)
+	    		source = File.join("#{gem_path}/#{$gem_file_name}/lib/template/",file)
 		    	FileUtils.cp(source,"#{target_dir}")
 		        $stdout.puts "\e[1;32m \tcreate\e[0m\t#{file}"
 		    end
 	    end
 
 	    def copy_files_to_dir(file,destination)
-	    	FileUtils.cp("#{gem_path}/rammer/lib/template/#{file}","#{target_dir}/#{destination}")
+	    	FileUtils.cp("#{gem_path}/#{$gem_file_name}/lib/template/#{file}","#{target_dir}/#{destination}")
 	        $stdout.puts "\e[1;32m \tcreate\e[0m\t#{destination}/#{file}"
 	    end
   	end
@@ -109,7 +109,7 @@ module Rammer
 	  		self.module_name = options[:module_name]
 	  		self.action = options[:action]
 	  		path = `gem which rammer`
-	  		self.gem_path = path.split("/.rvm",2).first
+	  		self.gem_path = path.split($gem_file_name,2).first
 	  	end
 
 	  	def run
@@ -164,7 +164,7 @@ module Rammer
 		end
 
 		def copy_module		
-			src = "#{gem_path}/rammer/lib/template/#{module_name}_apis.rb"
+			src = "#{gem_path}/#{$gem_file_name}/lib/template/#{module_name}_apis.rb"
 			dest = "#{Dir.pwd}/app/apis/#{target_dir}/modules"
 			presence = File.exists?("#{dest}/#{module_name}_apis.rb")? true : false
 			FileUtils.mkdir dest unless File.exists?(dest)
@@ -174,7 +174,7 @@ module Rammer
 	  	end
 
 	  	def create_migrations
-	  		src = "#{gem_path}/rammer/lib/template"
+	  		src = "#{gem_path}/#{$gem_file_name}/lib/template"
 	  		dest = "#{Dir.pwd}/db/migrate"
 	  		case module_name
 	  		when "authentication", "authorization"  	
@@ -212,7 +212,7 @@ module Rammer
 	  	end
 
 	  	def copy_model_files
-	  		src = "#{gem_path}/rammer/lib/template"
+	  		src = "#{gem_path}/#{$gem_file_name}/lib/template"
 	  		dest = "#{Dir.pwd}/app/models"
 	  		case module_name
 	  		when "authentication", "authorization"  	
