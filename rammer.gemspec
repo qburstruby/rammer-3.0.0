@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["manishaharidas"]
   spec.email         = ["manisha@qburst.com"]
   spec.summary       = %q{Grape+Goliath application generator gem}
-  spec.description   = %q{grape_goliath is a gem which creates an application with tree structure specified for a Goliath application having Grape framework.}
-  spec.homepage      = "http://github.com/qburstruby/grape_goliath"
+  spec.description   = %q{rammer is a gem which creates an application with tree structure specified for a Goliath application having Grape framework.}
+  spec.homepage      = "http://github.com/qburstruby/rammer"
   spec.license       = "MIT"
 
   spec.files         = ["lib/rammer.rb",
