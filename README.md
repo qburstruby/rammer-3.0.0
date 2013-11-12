@@ -1,6 +1,6 @@
 # Rammer
 
-rammer is a gem which creates an application with tree structure specified for a Goliath application having Grape framework.
+Rammer is a framework dedicated to build high performance Async API servers on top of non-blocking (asynchronous) Ruby web server called Goliath. Rammer APIs are designed on top of REST-like API micro-framework Grape. Rammer is modular and integrates a powerful CLI called Viber to plug in and out its modules.
 
 ## Installation
 
@@ -30,20 +30,19 @@ MODULE_NAME :
 
 Endpoints enabled with respective module:
 
-Authentication
-* sign_up 			=> "Enables user authentication using email, MD5 password and redirect url returning session token."
+- Authentication
+* sign_up 			: "Enables user authentication using email, MD5 password and redirect url returning session token."
 
-Authorization
-* sign_in 			=> "Enables user login using credentials returning session token."
-* sign_out 			=> "Enables user logout using credentials by invalidating the session token."
+- Authorization
+* sign_in 			: "Enables user login using credentials returning session token."
+* sign_out 			: "Enables user logout using credentials by invalidating the session token."
 
-Oauth
-* register_client 	=> "Registers ouath client using credentials returning client details like ID, Secret hash, 
-						authorization code."
-* authorize 		=> "Enables functionality for activating authorization page access."
-* access_token 		=> "Returns oauth access token for registered clients to authorized users."
-* token 			=> "Returns bearer token to registered third party clients."
-* invalidate_token 	=> "Invalidated the issued bearer token."
+- Oauth
+* register_client 	: "Registers ouath client using credentials returning client details like ID, Secret hash, authorization code."
+* authorize 		: "Enables functionality for activating authorization page access."
+* access_token 		: "Returns oauth access token for registered clients to authorized users."
+* token 			: "Returns bearer token to registered third party clients."
+* invalidate_token 	: "Invalidated the issued bearer token."
 
 ## Contributors
 
