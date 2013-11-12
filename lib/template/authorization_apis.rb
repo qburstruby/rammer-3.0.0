@@ -1,7 +1,7 @@
 require 'oauth2'
 require 'songkick/oauth2/provider'
 require 'ruby_regex'
-module GrapeGoliath
+module Rammer
     
     class AuthorizationApis < Grape::API
     	Songkick::OAuth2::Provider.realm = 'PocketAPI Oauth Server'

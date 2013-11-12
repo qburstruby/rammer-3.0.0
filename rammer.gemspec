@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Rammer::VERSION
   spec.authors       = ["manishaharidas"]
   spec.email         = ["manisha@qburst.com"]
-  spec.summary       = %q{Grape+Goliath application generator gem}
-  spec.description   = %q{grape_goliath is a gem which creates an application with tree structure specified for a Goliath application having Grape framework.}
-  spec.homepage      = "http://github.com/qburstruby/grape_goliath"
+  spec.summary       = %q{Rammer is a framework dedicated to build high performance Async API servers on top of non-blocking (asynchronous) Ruby web server called Goliath.}
+  spec.description   = %q{Rammer is a framework dedicated to build high performance Async API servers on top of non-blocking (asynchronous) Ruby web server called Goliath. Rammer APIs are designed on top of REST-like API micro-framework Grape. Rammer is modular and integrates a powerful CLI called Viber to plug in and out its modules.}
+  spec.homepage      = "http://github.com/qburstruby/rammer"
   spec.license       = "MIT"
 
   spec.files         = ["lib/rammer.rb",
