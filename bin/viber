@@ -66,8 +66,8 @@ Usage:
   viber module 
 
   options:
-    -p,-plugin      :Plugs in grape_goliath specified modules. 
-    -u,-unplug      :Unplugs grape_goliath specified modules.
+    -p,-plugin      :Plugs in rammer specified modules. 
+    -u,-unplug      :Unplugs rammer specified modules.
 EOF
     end    
 end
