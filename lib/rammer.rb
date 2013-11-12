@@ -21,7 +21,7 @@ module Rammer
 		    end
 		    self.target_dir  =  self.project_name
 		    path = `gem which rammer`
-	  		p self.gem_path = path.split($gem_file_name,2).first
+	  		self.gem_path = path.split($gem_file_name,2).first
 		end
 
 	    def run
