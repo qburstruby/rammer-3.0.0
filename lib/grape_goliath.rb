@@ -119,10 +119,10 @@ module GrapeGoliath
 				create_migrations
 				copy_model_files
 				add_gems
+				oauth_message if module_name == "oauth" && !flag
 			when "-u","-unplug"
 				unmount_module
 			end
-			return oauth_message if module_name == "oauth" && (action == "-p" || action == "-plugin")
 		end
 
 		def mount_module
