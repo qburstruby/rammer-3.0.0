@@ -3,37 +3,37 @@ class Oauth2Authorization < ActiveRecord::Base
 
   def get_token(owner,client, attributes = {})
     return nil unless owner and client
-        @instance = owner.oauth2_authorization(client,owner) ||
-            Oauth2Authorization.new do |authorization|
-                authorization.oauth2_resource_owner_id  = owner.id
-                authorization.oauth2_client_id = client.id
-            end
-        case attributes[:response_type]
-            when 'code'
-              @instance.code ||= create_code(client)
-            when 'token'
-              @instance.access_token  ||= create_access_token
-              @instance.refresh_token ||= create_refresh_token(client)
-              @instance.code ||= create_code(client)
-        end
+    @instance = owner.oauth2_authorization(client,owner) ||
+      Oauth2Authorization.new do |authorization|
+        authorization.oauth2_resource_owner_id  = owner.id
+        authorization.oauth2_client_id = client.id
+      end
+      case attributes[:response_type]
+      when 'code'
+        @instance.code ||= create_code(client)
+      when 'token'
+        @instance.access_token  ||= create_access_token
+        @instance.refresh_token ||= create_refresh_token(client)
+        @instance.code ||= create_code(client)
+      end
 
-        if @instance.expires_at.nil?        
-            @instance.expires_at = attributes[:duration].present? ? Time.now + attributes[:duration].to_i : nil         
-        elsif attributes[:invalidate]
-            @instance.expires_at = Time.now
-        end
+      if @instance.expires_at.nil?        
+        @instance.expires_at = attributes[:duration].present? ? Time.now + attributes[:duration].to_i : nil         
+      elsif attributes[:invalidate]
+        @instance.expires_at = Time.now
+      end
 
-        if @instance.scope.nil?
-          @instance.scope = attributes[:scope].present? ? attributes[:scope] : nil        
-        elsif attributes[:scope].present?
-          @instance.scope += "," + attributes[:scope] unless @instance.scope.include? attributes[:scope]
-        end
+      if @instance.scope.nil?
+        @instance.scope = attributes[:scope].present? ? attributes[:scope] : nil        
+      elsif attributes[:scope].present?
+        @instance.scope += "," + attributes[:scope] unless @instance.scope.include? attributes[:scope]
+      end
 
-        @instance.save
-        return @instance
+      @instance.save
+      return @instance
 
-        rescue Object => error
-            raise error
+      rescue Object => error
+        raise error
   end
 
   def refresh_access_token
@@ -43,7 +43,7 @@ class Oauth2Authorization < ActiveRecord::Base
 
   def create_code(client)
     Songkick::OAuth2.generate_id do |code|
-        return code
+      return code
     end
   end
 
@@ -97,12 +97,12 @@ class Oauth2Authorization < ActiveRecord::Base
 
   def build_url(redirect_uri)
     if redirect_uri.include? "#access_token" 
-        redirect_url = redirect_uri.gsub!('#','?')
+      redirect_url = redirect_uri.gsub!('#','?')
     elsif redirect_uri.include? "#"
-        redirect_url = redirect_uri.gsub!('#','?')
-        return redirect_uri + "access_token=#{self.access_token}"
+      redirect_url = redirect_uri.gsub!('#','?')
+      return redirect_uri + "access_token=#{self.access_token}"
     elsif redirect_uri.include? "access_token"
-        return redirect_uri + "?access_token=#{self.access_token}"
+      return redirect_uri + "?access_token=#{self.access_token}"
     end  
   end
 

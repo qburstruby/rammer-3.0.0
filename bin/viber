@@ -1,20 +1,19 @@
 #!/usr/bin/env ruby
-
 require 'rammer'
 
 def parse_options
-    case ARGV[1]
-    when "-p", "-plugin"
-        return true
-    when "-u", "-unplug"
-        return true
-    else
-        return false
-    end
+  case ARGV[1]
+  when "-p", "-plugin"
+    return true
+  when "-u", "-unplug"
+    return true
+  else
+    return false
+  end
 end
 
 def options_message
-STDOUT.puts <<-EOF
+  STDOUT.puts <<-EOF
 Please include module name
 
 Usage:
@@ -28,38 +27,38 @@ EOF
 end
 
 def execute(module_name,action)
-    target_dir = Dir.pwd.split('/',Dir.pwd.count('/')+1).last
-    name = target_dir.split.map(&:capitalize)*' '
-    case module_name
-    when "authentication"
-        module_class = "::#{name}::AuthenticationApis"
-    when "authorization"
-        module_class = "::#{name}::AuthorizationApis"
-    when "oauth"
-        module_class = "::#{name}::OauthApis"
-    end
-    options = { :target_dir => target_dir, :module_class => module_class, 
-                :module_name => module_name, :action => action}
-    module_generator = Rammer::ModuleGenerator.new(options)
-    module_generator.run
+  target_dir = Dir.pwd.split('/',Dir.pwd.count('/')+1).last
+  name = target_dir.split.map(&:capitalize)*' '
+  case module_name
+  when "authentication"
+    module_class = "::#{name}::AuthenticationApis"
+  when "authorization"
+    module_class = "::#{name}::AuthorizationApis"
+  when "oauth"
+    module_class = "::#{name}::OauthApis"
+  end
+  options = { :target_dir => target_dir, :module_class => module_class, 
+              :module_name => module_name, :action => action}
+  module_generator = Rammer::ModuleGenerator.new(options)
+  module_generator.run
 end
 
 case ARGV[0]
 when "module"
-    if parse_options
-        case ARGV[2]
-        when "authentication"
-            execute("authentication",ARGV[1])
-        when "authorization"
-            execute("authorization",ARGV[1])
-        when "oauth"
-            execute("oauth",ARGV[1])
-        else
-            options_message
-            exit
-        end
+  if parse_options
+    case ARGV[2]
+    when "authentication"
+      execute("authentication",ARGV[1])
+    when "authorization"
+      execute("authorization",ARGV[1])
+    when "oauth"
+      execute("oauth",ARGV[1])
     else
-        STDOUT.puts <<-EOF
+      options_message
+      exit
+    end
+  else
+    STDOUT.puts <<-EOF
 Please provide command options
 
 Usage:
@@ -69,5 +68,5 @@ Usage:
     -p,-plugin      :Plugs in rammer specified modules. 
     -u,-unplug      :Unplugs rammer specified modules.
 EOF
-    end    
+  end    
 end

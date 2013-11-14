@@ -6,6 +6,6 @@ require 'grape'
 require './tree'
 
 class Application < Goliath::API
-	def response(env)
-	end
+  def response(env)
+  end
 end
