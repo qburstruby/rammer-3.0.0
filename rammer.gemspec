@@ -36,6 +36,10 @@ Gem::Specification.new do |spec|
                         "lib/template/session.rb",
                         "lib/template/tree.rb",
                         "lib/template/user.rb",
+                        "test/helper.rb",
+                        "test/test_rammer_root_structure.rb",
+                        "test/test_viber_module_plugin.rb",
+                        "test/test_viber_module_unplug.rb",
                         "Gemfile",
                         "LICENSE.txt",
                         "README.md",
@@ -46,6 +50,8 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.4"
+  spec.add_development_dependency "bundler", "~> 1.4.0.rc.1"
   spec.add_development_dependency "rake"
+  spec.add_development_dependency "shoulda"
+  spec.add_development_dependency "simplecov"
 end

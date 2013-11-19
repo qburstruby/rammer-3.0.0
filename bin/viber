@@ -28,7 +28,7 @@ end
 
 def execute(module_name,action)
   target_dir = Dir.pwd.split('/',Dir.pwd.count('/')+1).last
-  name = target_dir.split.map(&:capitalize)*' '
+  name = target_dir.split('_').map(&:capitalize)*''
   case module_name
   when "authentication"
     module_class = "::#{name}::AuthenticationApis"
@@ -37,7 +37,7 @@ def execute(module_name,action)
   when "oauth"
     module_class = "::#{name}::OauthApis"
   end
-  options = { :target_dir => target_dir, :module_class => module_class, 
+  options = { :project_name => target_dir, :module_class => module_class, 
               :module_name => module_name, :action => action}
   module_generator = Rammer::ModuleGenerator.new(options)
   module_generator.run

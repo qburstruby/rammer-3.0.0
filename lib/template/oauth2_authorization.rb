@@ -3,37 +3,42 @@ class Oauth2Authorization < ActiveRecord::Base
 
   def get_token(owner,client, attributes = {})
     return nil unless owner and client
-    @instance = owner.oauth2_authorization(client,owner) ||
-      Oauth2Authorization.new do |authorization|
-        authorization.oauth2_resource_owner_id  = owner.id
-        authorization.oauth2_client_id = client.id
-      end
-      case attributes[:response_type]
-      when 'code'
-        @instance.code ||= create_code(client)
-      when 'token'
-        @instance.access_token  ||= create_access_token
-        @instance.refresh_token ||= create_refresh_token(client)
-        @instance.code ||= create_code(client)
-      end
+        @instance = owner.oauth2_authorization(client,owner) ||
+            Oauth2Authorization.new do |authorization|
+                authorization.oauth2_resource_owner_id  = owner.id
+                authorization.oauth2_client_id = client.id
+            end
+        case attributes[:response_type]
+            when 'code'
+              @instance.code ||= create_code(client)
+            when 'token'
+              @instance.access_token  ||= create_access_token
+              @instance.refresh_token ||= create_refresh_token(client)
+        end
 
-      if @instance.expires_at.nil?        
-        @instance.expires_at = attributes[:duration].present? ? Time.now + attributes[:duration].to_i : nil         
-      elsif attributes[:invalidate]
-        @instance.expires_at = Time.now
-      end
+        if @instance.expires_at.nil?        
+            @instance.expires_at = attributes[:duration].present? ? Time.now + attributes[:duration].to_i : nil         
+        elsif attributes[:invalidate]
+            @instance.expires_at = Time.now
+        end
 
-      if @instance.scope.nil?
-        @instance.scope = attributes[:scope].present? ? attributes[:scope] : nil        
-      elsif attributes[:scope].present?
-        @instance.scope += "," + attributes[:scope] unless @instance.scope.include? attributes[:scope]
-      end
+        if @instance.scope.nil?
+          @instance.scope = attributes[:scope].present? ? attributes[:scope] : nil        
+        elsif attributes[:scope].present?
+          @instance.scope += "," + attributes[:scope] unless @instance.scope.include? attributes[:scope]
+        end
 
-      @instance.save
-      return @instance
+        @instance.save
+        return @instance
 
-      rescue Object => error
-        raise error
+        rescue Object => error
+            raise error
+  end
+
+  def api_response(redirect_uri)
+    redirect_to_url = self.build_url(redirect_uri,"token") 
+    self.refresh_access_token if self.expired? 
+    return redirect_to_url
   end
 
   def refresh_access_token
@@ -43,7 +48,7 @@ class Oauth2Authorization < ActiveRecord::Base
 
   def create_code(client)
     Songkick::OAuth2.generate_id do |code|
-      return code
+        return code
     end
   end
 
@@ -56,8 +61,13 @@ class Oauth2Authorization < ActiveRecord::Base
   end
 
   def create_refresh_token(client)
+    verified_client = Oauth2Client.find_by_client_id(client.client_id)
     Songkick::OAuth2.generate_id do |refresh_token|
-      hash = Songkick::OAuth2.hashify(refresh_token)
+      if verified_client
+          hash = Songkick::OAuth2.hashify(refresh_token)
+        else
+            hash = nil
+          end
     end
       return hash
   end
@@ -95,15 +105,15 @@ class Oauth2Authorization < ActiveRecord::Base
     }
   end
 
-  def build_url(redirect_uri)
-    if redirect_uri.include? "#access_token" 
-      redirect_url = redirect_uri.gsub!('#','?')
-    elsif redirect_uri.include? "#"
-      redirect_url = redirect_uri.gsub!('#','?')
-      return redirect_uri + "access_token=#{self.access_token}"
-    elsif redirect_uri.include? "access_token"
-      return redirect_uri + "?access_token=#{self.access_token}"
-    end  
+  def build_url(redirect_uri,type)
+    path = redirect_uri.split('#',2).first if redirect_uri.include? "#"
+    path = redirect_uri.split('?',2).first if redirect_uri.include? "?"
+    case type
+    when "token"
+      return path + "?access_token=#{self.access_token}"
+    when "code"
+      return path + "?request_token=#{self.code}"
+    end
   end
 
   def redirect(auth)

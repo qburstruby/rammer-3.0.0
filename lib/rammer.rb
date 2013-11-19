@@ -6,38 +6,45 @@ $gem_file_name = "rammer-"+Rammer::VERSION
 module Rammer
   #Generator class for folder structure
   class Generator
-    attr_accessor :target_dir, :project_name, :module_name, :gem_path
+    attr_accessor :project_name, :target_dir, :module_name, :gem_path, :valid_name
     BASE_DIR = ['app', 'app/apis', 'config', 'db', 'db/migrate', 'app/models']          
     TEMPLATE_FILES = ['Gemfile','Gemfile.lock','Procfile','Rakefile','server.rb', 'tree.rb']
+    RESERVED_WORDS = ['rammer', 'viber', 'test', 'lib', 'template', 'authorization', 'authentication', 'app', 'apis', 'models', 'migrate', 'oauth', 'oauth2']
 
     def initialize(dir_name)
       self.project_name   = dir_name
       if self.project_name.nil? || self.project_name.squeeze.strip == ""
-        raise NoGitHubRepoNameGiven
-      else
-        path = File.split(self.project_name)
-        if path.size > 1
-          extracted_directory = File.join(path[0..-1])
-          self.project_name = path.last
+        $stdout.puts "\e[1;31mError:\e[0m Please specify an application name."
+      elsif self.project_name
+        RESERVED_WORDS.each do |name| 
+          if name == self.project_name
+            $stdout.puts "\e[1;31mError:\e[0m Invalid application name #{project_name}. Please give a name which does not match one of the reserved rammer words."
+            self.valid_name = false
+            break
+          else
+            self.valid_name = true
+          end
         end
       end
-      self.target_dir  =  self.project_name
+      self.target_dir  =  Dir.pwd + "/" + self.project_name
       path = `gem which rammer`
-	  self.gem_path = path.split($gem_file_name,2).first
+	    self.gem_path = path.split($gem_file_name,2).first + $gem_file_name        
     end
 
     def run
-      unless File.exists?(target_dir) || File.directory?(target_dir)
-        $stdout.puts "Creating goliath application under the directory #{target_dir}"
-        FileUtils.mkdir target_dir
+      unless !self.valid_name || File.exists?(project_name) || File.directory?(project_name)
+        $stdout.puts "Creating goliath application under the directory #{project_name}"
+        FileUtils.mkdir project_name
         create_base_dirs
         copy_files_to_target
         setup_api_module
         copy_files_to_dir 'application.rb','config'
         copy_files_to_dir 'database.yml','config'
         $stdout.puts "\e[33mRun `bundle install` to install missing gems.\e[0m"
-      else
-        $stdout.puts "\e[1;31mError:\e[0m The directory #{target_dir} already exists, aborting. Maybe move it out of the way before continuing."
+      else 
+        unless !self.valid_name
+          $stdout.puts "\e[1;31mError:\e[0m The directory #{project_name} already exists, aborting. Maybe move it out of the way before continuing."
+        end
       end
     end
 
@@ -45,61 +52,61 @@ module Rammer
 
     def create_base_dirs
       BASE_DIR.each do |dir|
-        FileUtils.mkdir "#{target_dir}/#{dir}"
+        FileUtils.mkdir "#{project_name}/#{dir}"
         $stdout.puts "\e[1;32m \tcreate\e[0m\t#{dir}"
       end
-      FileUtils.mkdir "#{target_dir}/app/apis/#{target_dir}"
-      $stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{target_dir}"
+      FileUtils.mkdir "#{project_name}/app/apis/#{project_name}"
+      $stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{project_name}"
     end
 
     def setup_api_module
-      self.module_name = target_dir.split('_').map(&:capitalize).join('')
+      self.module_name = project_name.split('_').map(&:capitalize).join('')
       create_api_module
       config_server
     end
 
     def create_api_module
-      File.open("#{target_dir}/app/apis/#{target_dir}/base.rb", "w") do |f|
+      File.open("#{project_name}/app/apis/#{project_name}/base.rb", "w") do |f|
         f.write('module ') 
         f.puts(module_name)
         f.write("\tclass Base < Grape::API\n\tend\nend")
       end
-      $stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{target_dir}/base.rb"
+      $stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{project_name}/base.rb"
     end
 
     def config_server
-      file = File.open("#{target_dir}/server.rb", "r+")
+      file = File.open("#{project_name}/server.rb", "r+")
       file.each do |line|	   
-        while line == "\tdef response(env)\n" do
+        while line == "  def response(env)\n" do
           pos = file.pos
           rest = file.read
           file.seek pos
-          file.write("\t\t::") 
+          file.write("\t::") 
           file.write(module_name)
           file.write("::Base.call(env)\n")
           file.write(rest)
+          $stdout.puts "\e[1;35m \tconfig\e[0m\tserver.rb"
           return
         end
       end
-      $stdout.puts "\e[1;32m \tcreate\e[0m\tserver.rb"
     end
 
     def copy_files_to_target
       TEMPLATE_FILES.each do |file|
-        source = File.join("#{gem_path}/#{$gem_file_name}/lib/template/",file)
-        FileUtils.cp(source,"#{target_dir}")
+        source = File.join("#{gem_path}/lib/template/",file)
+        FileUtils.cp(source,"#{project_name}")
         $stdout.puts "\e[1;32m \tcreate\e[0m\t#{file}"
       end
     end
 
     def copy_files_to_dir(file,destination)
-      FileUtils.cp("#{gem_path}/#{$gem_file_name}/lib/template/#{file}","#{target_dir}/#{destination}")
+      FileUtils.cp("#{gem_path}/lib/template/#{file}","#{project_name}/#{destination}")
       $stdout.puts "\e[1;32m \tcreate\e[0m\t#{destination}/#{file}"
     end
   end
   #Generator class for viber commands 
   class ModuleGenerator
-    attr_accessor :target_dir, :module_class, :options, :module_name, :gem_path, :action
+    attr_accessor :target_dir, :project_name, :module_class, :options, :module_name, :gem_path, :action
     AUTH_MIGRATE = ['01_create_users.rb','02_create_sessions.rb']
     OAUTH_MIGRATE = ['03_create_owners.rb', '04_create_oauth2_authorizations.rb', '05_create_oauth2_clients.rb']
     AUTH_MODELS = ['user.rb', 'session.rb', 'oauth2_authorization.rb']
@@ -107,12 +114,13 @@ module Rammer
 
     def initialize(options)
       self.options = options
-      self.target_dir = options[:target_dir]
+      self.project_name = options[:project_name]
       self.module_class = options[:module_class]
       self.module_name = options[:module_name]
       self.action = options[:action]
+      self.target_dir = Dir.pwd
       path = `gem which rammer`
-      self.gem_path = path.split($gem_file_name,2).first
+      self.gem_path = path.split($gem_file_name,2).first + "/" + $gem_file_name
     end
 
     def run
@@ -131,7 +139,7 @@ module Rammer
     end
 
     def mount_module
-      file = File.open("#{Dir.pwd}/app/apis/#{target_dir}/base.rb", "r+")
+      file = File.open("#{target_dir}/app/apis/#{project_name}/base.rb", "r+")
       file.each do |line|
         while line == "\tclass Base < Grape::API\n" do
           pos = file.pos
@@ -147,14 +155,14 @@ module Rammer
     end
 
     def require_module_to_base
-      file = File.open("#{Dir.pwd}/app/apis/#{target_dir}/base.rb", "r+")
+      file = File.open("#{target_dir}/app/apis/#{project_name}/base.rb", "r+")
       file.each do |line|
         while line == "require_relative './modules/#{module_name}_apis'\n" do
           $stdout.puts "\e[33mModule already mounted.\e[0m"
           return true
         end
       end
-      File.open("#{Dir.pwd}/app/apis/#{target_dir}/base.rb", "r+") do |f|	
+      File.open("#{target_dir}/app/apis/#{project_name}/base.rb", "r+") do |f|	
         pos = f.pos		
         rest = f.read
         f.seek pos
@@ -167,18 +175,18 @@ module Rammer
     end
 
     def copy_module		
-      src = "#{gem_path}/#{$gem_file_name}/lib/template/#{module_name}_apis.rb"
-      dest = "#{Dir.pwd}/app/apis/#{target_dir}/modules"
+      src = "#{gem_path}/lib/template/#{module_name}_apis.rb"
+      dest = "#{target_dir}/app/apis/#{project_name}/modules"
       presence = File.exists?("#{dest}/#{module_name}_apis.rb")? true : false
       FileUtils.mkdir dest unless File.exists?(dest)
       FileUtils.cp(src,dest) unless presence
       configure_module_files
-      $stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{target_dir}/modules/#{module_name}_apis.rb" unless presence
+      $stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{project_name}/modules/#{module_name}_apis.rb" unless presence
     end
 
     def create_migrations
-      src = "#{gem_path}/#{$gem_file_name}/lib/template"
-      dest = "#{Dir.pwd}/db/migrate"
+      src = "#{gem_path}/lib/template"
+      dest = "#{target_dir}/db/migrate"
       case module_name
       when "authentication", "authorization"  	
         common_migrations(src,dest)
@@ -215,8 +223,8 @@ module Rammer
     end
 
     def copy_model_files
-      src = "#{gem_path}/#{$gem_file_name}/lib/template"
-      dest = "#{Dir.pwd}/app/models"
+      src = "#{gem_path}/lib/template"
+      dest = "#{target_dir}/app/models"
       case module_name
       when "authentication", "authorization"  	
         common_models(src,dest)
@@ -233,21 +241,21 @@ module Rammer
     end
 
     def configure_module_files
-      file = File.read("#{Dir.pwd}/app/apis/#{target_dir}/modules/#{module_name}_apis.rb")
-      replace = file.gsub(/module Rammer/, "module #{target_dir.split('_').map(&:capitalize)*''}")
-      File.open("#{Dir.pwd}/app/apis/#{target_dir}/modules/#{module_name}_apis.rb", "w"){|f|
+      file = File.read("#{target_dir}/app/apis/#{project_name}/modules/#{module_name}_apis.rb")
+      replace = file.gsub(/module Rammer/, "module #{project_name.split('_').map(&:capitalize)*''}")
+      File.open("#{target_dir}/app/apis/#{project_name}/modules/#{module_name}_apis.rb", "w"){|f|
         f.puts replace
       }
     end
 
     def add_gems
-      file = File.open("#{Dir.pwd}/Gemfile", "r+")
+      file = File.open("#{target_dir}/Gemfile", "r+")
       file.each do |line|
         while line == "gem 'oauth2'\n" do
           return
         end
       end
-      File.open("#{Dir.pwd}/Gemfile", "a+") do |f|
+      File.open("#{target_dir}/Gemfile", "a+") do |f|
         f.write("gem 'multi_json'\ngem 'oauth2'\ngem 'songkick-oauth2-provider'\ngem 'ruby_regex'\ngem 'oauth'\n")
       end
       $stdout.puts "\e[1;35m \tGemfile\e[0m\tgem 'multi_json'\n\t\tgem 'oauth2'
@@ -257,9 +265,9 @@ module Rammer
     end
 
     def unmount_module
-      temp_file = "#{Dir.pwd}/app/apis/#{target_dir}/tmp.rb"
-      source = "#{Dir.pwd}/app/apis/#{target_dir}/base.rb"
-      delete_file = "#{Dir.pwd}/app/apis/#{target_dir}/modules/#{module_name}_apis.rb"
+      temp_file = "#{target_dir}/app/apis/#{project_name}/tmp.rb"
+      source = "#{target_dir}/app/apis/#{project_name}/base.rb"
+      delete_file = "#{target_dir}/app/apis/#{project_name}/modules/#{module_name}_apis.rb"
       File.open(temp_file, "w") do |out_file|
         File.foreach(source) do |line|
           unless line == "require_relative './modules/#{module_name}_apis'\n"
@@ -271,7 +279,7 @@ module Rammer
       if File.exists?(delete_file)
         FileUtils.rm(delete_file) 
         $stdout.puts "\e[1;35m\tunmounted\e[0m\t#{module_class}" 
-        $stdout.puts "\e[1;31m\tdelete\e[0m\t\tapp/apis/#{target_dir}/modules/#{module_name}_apis.rb" 
+        $stdout.puts "\e[1;31m\tdelete\e[0m\t\tapp/apis/#{project_name}/modules/#{module_name}_apis.rb" 
       else
         $stdout.puts "\e[33mModule already unmounted.\e[0m"
       end

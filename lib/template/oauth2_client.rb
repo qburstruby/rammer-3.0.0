@@ -1,5 +1,5 @@
 class Oauth2Client < ActiveRecord::Base
-	has_many :oauth2_authorizations
+  has_many :oauth2_authorizations
   attr_accessible :name, :client_id, :client_secret_hash, :redirect_uri
   validates_presence_of :name, :client_id, :client_secret_hash, :redirect_uri
   validates_uniqueness_of :client_id
@@ -12,23 +12,60 @@ class Oauth2Client < ActiveRecord::Base
       error_message = Oauth2Authorization.error_response(error)
       return error_message, false
     else
-      @oauth2_client = Oauth2Client.create!(params)          
+      @oauth2_client = Oauth2Client.create!(:name => params.name, :redirect_uri => params.redirect_uri)          
       string = "#{@oauth2_client.client_id}:#{@oauth2_client.client_secret_hash}"
       @oauth2_client.update_attribute(:basic_code, Base64.encode64(string))
-      redirect_url = @oauth2_client.redirect_to_url
+      redirect_url = @oauth2_client.redirect_to_url(params.callback_url)
       return redirect_url, true
     end
   end
 
-	def self.valid_authorization?(params)
-		authorization_decoded = Base64.decode64(params.authorization)  	
-		@client = Oauth2Client.find_by_client_id(params.client_id)
-    if @client
-		  return authorization_decoded.eql?("#{@client.client_id}:#{@client.client_secret_hash}")? true : false  
-    end		
-	end
+  def self.valid_authorization?(params)
+    authorization_decoded = Base64.decode64(params.authorization)   
+    @client = Oauth2Client.find_by_client_id(params.client_id)
+    if @client 
+      unless authorization_decoded.eql?("#{@client.client_id}:#{@client.client_secret_hash}")
+        return false, "present"
+      else
+        return true, "present"
+      end
+    else
+      return false, "absent"
+    end   
+  end
 
-	def self.grant_access(params,env,request_type)
+  def self.grant_code(params,env)
+      @owner  = Owner.find_by_username(params.username)
+      @owner = Owner.create(:username => params.username) if @owner.nil?
+
+    @oauth2 = Songkick::OAuth2::Provider.parse(@owner, env)  
+    if @oauth2.valid?    
+        @auth = Songkick::OAuth2::Provider::Authorization.new(@owner, params)
+        @authenticated_owner = Oauth2Authorization.find_by_oauth2_resource_owner_id_and_oauth2_client_id(@owner.id,@auth.client.id)
+        unless @authenticated_owner
+          @oauth2_authorization_instance = Oauth2Authorization.new()
+          @instance = @oauth2_authorization_instance.get_token(@auth.owner, @auth.client,
+                    :response_type => "code",
+                    :scope => params["scope"].present? ? params["scope"] : nil,
+                    :duration => params["duration"].present? ? params["duration"] : 3600)   
+        else
+          @instance = @authenticated_owner
+        end
+        if @instance.code.nil?                
+          error_message = Oauth2Authorization.error_response(@oauth2.error_description)
+          return error_message, false   
+        else
+          redirect_to_url = @instance.build_url(@auth.redirect_uri,"code") 
+          @instance.refresh_access_token if @instance.expired?  
+          return redirect_to_url, true                      
+        end  
+    else
+      error_message = Oauth2Authorization.error_response(@oauth2.error_description) 
+      return error_message, false  
+    end
+  end
+
+  def self.grant_access(params,env,request_type)
     if request_type == "user"
       @owner  = Owner.find_by_username(params.username)
       @owner = Owner.create(:username => params.username) if @owner.nil?
@@ -53,10 +90,22 @@ class Oauth2Client < ActiveRecord::Base
         if @instance.access_token.nil?                
           error_message = Oauth2Authorization.error_response(@oauth2.error_description)
           return error_message, false   
+        elsif @instance.code.nil? && request_type == "user"
+          error = "Invalid request. Request token generation required."
+          error_message = Oauth2Authorization.error_response(error)
+          return error_message, false   
         else
-          redirect_to_url = @instance.build_url(@auth.redirect_uri) 
-          @instance.refresh_access_token if @instance.expired?  
-          return redirect_to_url, true                      
+          if request_type == "bearer"
+            redirect_to_url = @instance.api_response(@auth.redirect_uri)
+            return redirect_to_url, true 
+          elsif @instance.code == params.request_token && request_type == "user"
+            redirect_to_url = @instance.api_response(@auth.redirect_uri) 
+            return redirect_to_url, true  
+          else 
+            error = "Invalid request token."
+            error_message = Oauth2Authorization.error_response(error)
+            return error_message, false      
+          end            
         end  
     else
       error_message = Oauth2Authorization.error_response(@oauth2.error_description) 
@@ -86,9 +135,9 @@ class Oauth2Client < ActiveRecord::Base
     end
   end
 
-  def redirect_to_url
-    return self.redirect_uri + "?client_id=#{self.client_id}&client_secret_hash=#{self.client_secret_hash}
-          &redirect_uri=#{self.redirect_uri}&authorization=#{self.basic_code}"
+  def redirect_to_url(callback_url)
+    client_details = "client_id=#{self.client_id}"
+    return callback_url + "?#{client_details}"
   end
 
   protected

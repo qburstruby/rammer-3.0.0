@@ -13,11 +13,12 @@ module Rammer
 =begin
 This handles api calls for request token generation with the request parameters:
 {"name"=> Client's name,
- "redirect_uri" => URL to which the oauth should be redirected
+ "redirect_uri" => URL to which the oauth should be redirected,
+ "callback_url" => Url to which the details should be redirected
  }
 =end
     [:get, :post].each do |method|
-	  __send__ method, '/oauth/register_client' do
+	  __send__ method, '/oauth/authenticate' do
 	  	if User.validate_params?(params,"register")
 	      expected_response,response_message = Oauth2Client.register(params)
 		  if response_message then redirect expected_response else expected_response end
@@ -26,14 +27,39 @@ This handles api calls for request token generation with the request parameters:
 		  Oauth2Authorization.error_response(error)
 		end		
 	  end
-	end   
+	end 
 
 =begin
 This handles api calls for request token generation with the request parameters:
 {"client_id"=> Client's registered ID,
  "username" => Authorized user's session id,
  "redirect_uri" => URL to which the oauth should be redirected,
- "response_type" => "token" (Keyword to return request token)
+ "response_type" => "code" (Keyword to return request token)
+ }
+=end 
+    [:get, :post].each do |method|
+	  __send__ method, '/oauth/request_token' do
+		if User.validate_params?(params,"request_token")
+		  if User.logged_in?(params)
+	  		expected_response,response_message = Oauth2Client.grant_code(params,env)
+			if response_message then redirect expected_response else expected_response end
+		  else
+			error = "Invalid user session."
+			Oauth2Authorization.error_response(error)	
+		  end
+		else
+		  error = "Parameters missing or invalid."
+		  Oauth2Authorization.error_response(error)
+		end
+	  end
+	end  
+
+=begin
+This handles api calls for request token generation with the request parameters:
+{"client_id"=> Client's registered ID,
+ "username" => Authorized user's session id,
+ "redirect_uri" => URL to which the oauth should be redirected,
+ "response_type" => "code" (Keyword to return request token),
  }
 =end
 	[:get, :post].each do |method|
@@ -64,7 +90,12 @@ This handles api calls for access token generation with the request parameters:
 {"client_id"=> Client's registered ID,
  "username" => Authorized user's session id,
  "redirect_uri" => URL to which the oauth should be redirected,
- "response_type" => "token" (Keyword to return access token)
+ "response_type" => "token" (Keyword to return access token),
+ "request_token" => "Request token received from /request_token endpoint."
+ }
+ Optional parameters:
+ {"scope" => Indicates the API's the application is requesting,
+  "duration" => Lifetime of bearer token	
  }
 =end
 	[:get, :post].each do |method|
