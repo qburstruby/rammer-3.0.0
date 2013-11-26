@@ -1,7 +1,7 @@
 production: &production
   adapter: em_postgresql
   encoding: unicode
-  database: goliathgrape
+  database: rammer_app
   pool: 5
   username: root
   password: 
