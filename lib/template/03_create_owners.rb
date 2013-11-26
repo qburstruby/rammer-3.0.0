@@ -25,7 +25,7 @@
 **************************************************************************
 =end
 
-class CreateOwner < ActiveRecord::Migration
+class CreateOwners < ActiveRecord::Migration
   def self.up
     create_table :owners do |t|
       t.timestamps
