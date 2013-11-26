@@ -31,6 +31,7 @@ require 'fileutils'
 $gem_file_name = "rammer-"+Rammer::VERSION
 
 module Rammer
+  
 =begin
 Generator class for creating application basic folder structure
 =end
@@ -39,6 +40,7 @@ Generator class for creating application basic folder structure
     BASE_DIR = ['app', 'app/apis', 'config', 'db', 'db/migrate', 'app/models']          
     TEMPLATE_FILES = ['Gemfile','Gemfile.lock','Procfile','Rakefile','server.rb', 'tree.rb']
     RESERVED_WORDS = ['rammer', 'viber', 'test', 'lib', 'template', 'authorization', 'authentication', 'app', 'apis', 'models', 'migrate', 'oauth', 'oauth2']
+
 =begin
 Initiliazes the following attributes : 
     project_name (application name), valid_name (boolean value for validation), target_dir (new application path)
@@ -54,10 +56,12 @@ Initiliazes the following attributes :
         $stdout.puts "\e[1;31mError:\e[0m Invalid application name #{project_name}. Please give a name which does not match one of the reserved rammer words."
         self.valid_name = false
       end
+      
       self.target_dir  =  Dir.pwd + "/" + self.project_name
       path = `gem which rammer`
 	    self.gem_path = path.split($gem_file_name,2).first + $gem_file_name        
     end
+    
 =begin
 Creates a basic folder structure with required files and configuration setup.
 =end
@@ -65,6 +69,7 @@ Creates a basic folder structure with required files and configuration setup.
       unless !valid_name || File.exists?(project_name) || File.directory?(project_name)
         $stdout.puts "Creating goliath application under the directory #{project_name}"
         FileUtils.mkdir project_name
+        
         create_base_dirs
         copy_files_to_target
         setup_api_module
@@ -79,6 +84,7 @@ Creates a basic folder structure with required files and configuration setup.
     end
 
     private
+    
 =begin
 Creates the application base directories.
 =end
@@ -90,8 +96,9 @@ Creates the application base directories.
       FileUtils.mkdir "#{project_name}/app/apis/#{project_name}"
       $stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{project_name}"
     end
+    
 =begin
-Creates api modules, required files and configures the server with respect to new application.
+Function to setup the API modules.
 =end
     def setup_api_module
       self.module_name = project_name.split('_').map(&:capitalize).join('')
@@ -99,6 +106,9 @@ Creates api modules, required files and configures the server with respect to ne
       config_server
     end
 
+=begin
+Function to create the API modules.
+=end
     def create_api_module
       File.open("#{project_name}/app/apis/#{project_name}/base.rb", "w") do |f|
         f.write('module ') 
@@ -108,6 +118,9 @@ Creates api modules, required files and configures the server with respect to ne
       $stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{project_name}/base.rb"
     end
 
+=begin
+Function to configure the Goliath server.
+=end
     def config_server
       file = File.open("#{project_name}/server.rb", "r+")
       file.each do |line|	   
@@ -125,6 +138,9 @@ Creates api modules, required files and configures the server with respect to ne
       end
     end
 
+=begin
+Function to copy the template files project location.
+=end
     def copy_files_to_target
       TEMPLATE_FILES.each do |file|
         source = File.join("#{gem_path}/lib/template/",file)
@@ -133,6 +149,9 @@ Creates api modules, required files and configures the server with respect to ne
       end
     end
 
+=begin
+Creates api modules, required files and configures the server with respect to new application.
+=end
     def copy_files_to_dir(file,destination)
       FileUtils.cp("#{gem_path}/lib/template/#{file}","#{project_name}/#{destination}")
       $stdout.puts "\e[1;32m \tcreate\e[0m\t#{destination}/#{file}"

@@ -41,6 +41,7 @@ and the runs bundle install.
     OAUTH_MIGRATE = ['03_create_owners.rb', '04_create_oauth2_authorizations.rb', '05_create_oauth2_clients.rb']
     AUTH_MODELS = ['user.rb', 'session.rb', 'oauth2_authorization.rb']
     OAUTH_MODELS = ['oauth2_client.rb', 'owner.rb']
+    
 =begin
 Initiliazes the following attributes : 
     project_name (application name), module_class (class name for the application), target_dir (new application path),
@@ -55,6 +56,7 @@ Initiliazes the following attributes :
       path = `gem which rammer`
       self.gem_path = path.split($gem_file_name,2).first + "/" + $gem_file_name
     end
+    
 =begin
 Creates the required files and configuration setup while module plugin or unplug.
 =end
@@ -71,6 +73,7 @@ Creates the required files and configuration setup while module plugin or unplug
         unmount_module
       end
     end
+    
 =begin
 Mounts the module onto the application.
 =end
@@ -89,6 +92,7 @@ Mounts the module onto the application.
       end
       $stdout.puts "\e[1;35m\tmounted\e[0m\t#{module_class}"
     end
+    
 =begin
 Checks whether the module is already mounted and if not then configures for mounting.
 =end
@@ -100,6 +104,7 @@ Checks whether the module is already mounted and if not then configures for moun
           return true
         end
       end
+
       File.open("#{target_dir}/app/apis/#{project_name}/base.rb", "r+") do |f|	
         pos = f.pos		
         rest = f.read
@@ -112,6 +117,9 @@ Checks whether the module is already mounted and if not then configures for moun
       return false
     end
 
+=begin
+Function to copy the module of interest to project location.
+=end
     def copy_module		
       src = "#{gem_path}/lib/template/#{module_name}_apis.rb"
       dest = "#{target_dir}/app/apis/#{project_name}/modules"
@@ -122,6 +130,9 @@ Checks whether the module is already mounted and if not then configures for moun
       $stdout.puts "\e[1;32m \tcreate\e[0m\tapp/apis/#{project_name}/modules/#{module_name}_apis.rb" unless presence
     end
 
+=begin
+ Function to create the necessary migrations and models. 
+=end
     def create_migrations_and_models
       src = "#{gem_path}/lib/template"
       dest = "#{target_dir}/db/migrate"
@@ -136,6 +147,9 @@ Checks whether the module is already mounted and if not then configures for moun
       end
     end
 
+=begin
+Function to copy the module files to project location.
+=end
     def copy_files(src,dest,module_model)
       module_model.each do |file|
         presence = File.exists?("#{dest}/#{file}")? true : false
@@ -147,6 +161,9 @@ Checks whether the module is already mounted and if not then configures for moun
       end
     end
 
+=begin
+Function to configure the module files.
+=end
     def configure_module_files
       source = "#{target_dir}/app/apis/#{project_name}/modules/#{module_name}_apis.rb"
       application_module = project_name.split('_').map(&:capitalize)*''
@@ -157,6 +174,9 @@ Checks whether the module is already mounted and if not then configures for moun
       }
     end
 
+=begin
+Function to add the module dependency gems to project Gemfile.
+=end
     def add_gems
       file = File.open("#{target_dir}/Gemfile", "r+")
       file.each do |line|
@@ -168,10 +188,11 @@ Checks whether the module is already mounted and if not then configures for moun
         f.write("gem 'multi_json'\ngem 'oauth2'\ngem 'songkick-oauth2-provider'\ngem 'ruby_regex'\ngem 'oauth'\n")
       end
       $stdout.puts "\e[1;35m \tGemfile\e[0m\tgem 'multi_json'\n\t\tgem 'oauth2'
-\t\tgem 'songkick-oauth2-provider'\n\t\tgem 'ruby_regex'\n\t\tgem 'oauth'\n"
+                   \t\tgem 'songkick-oauth2-provider'\n\t\tgem 'ruby_regex'\n\t\tgem 'oauth'\n"
       $stdout.puts "\e[1;32m \trun\e[0m\tbundle install"
       system("bundle install")
     end
+    
 =begin
 Unmounts the modules by removing the respective module files.
 =end
@@ -180,6 +201,7 @@ Unmounts the modules by removing the respective module files.
       temp_file = "#{path}/tmp.rb"
       source = "#{path}/base.rb"
       delete_file = "#{path}/modules/#{module_name}_apis.rb"
+      
       File.open(temp_file, "w") do |out_file|
         File.foreach(source) do |line|
           unless line == "require_relative './modules/#{module_name}_apis'\n"
@@ -188,6 +210,7 @@ Unmounts the modules by removing the respective module files.
         end
         FileUtils.mv(temp_file, source)
       end
+      
       if File.exists?(delete_file)
         FileUtils.rm(delete_file) 
         $stdout.puts "\e[1;35m\tunmounted\e[0m\t#{module_class}" 
@@ -196,16 +219,17 @@ Unmounts the modules by removing the respective module files.
         $stdout.puts "\e[33mModule already unmounted.\e[0m"
       end
     end
+
 =begin
 Notification for oauth module api functionality access.
 =end
     def oauth_message
       $stdout.puts "\e[33m
-In app/apis/<APP_NAME>/modules/oauth_apis.rb
-Specify redirection url to the respective authorization page into 'redirect_to_url'
-and uncomment the code to enable /oauth/authorize endpoint functionality.
-
-\e[0m"
+                    In app/apis/<APP_NAME>/modules/oauth_apis.rb
+                    Specify redirection url to the respective authorization page into 'redirect_to_url'
+                    and uncomment the code to enable /oauth/authorize endpoint functionality.
+                    
+                    \e[0m"
     end
   end
 end
