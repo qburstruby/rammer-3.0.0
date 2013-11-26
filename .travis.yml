@@ -1,4 +1,5 @@
 language: ruby
 rvm:
   - "1.9.3"
+before_install: gem install bundler -v 1.4.0.rc.1 --pre
 script: bundle exec rake test
