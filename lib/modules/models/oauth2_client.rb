@@ -64,8 +64,9 @@ Checks for valid authorization basic code.
       return false, "absent"
     end   
   end
+
 =begin
-Processes the /access_token and /request_token endpoint and returns the required doauth details.
+Processes the /access_token /authorize and /request_token endpoint and returns the required oauth details.
 =end
   def self.process_request(params,env,action)
     if User.logged_in?(params)
@@ -74,6 +75,10 @@ Processes the /access_token and /request_token endpoint and returns the required
         expected_response,response_message = Oauth2Client.grant_code(params,env)
       when "token"
         expected_response,response_message = Oauth2Client.grant_access(params,env,"user")
+      when "authorize"
+        @oauth2 = Songkick::OAuth2::Provider.parse(@owner, env)
+        expected_response = "Redirection url to authorization page" 
+        response_message = true
       end
       return expected_response,response_message
     else

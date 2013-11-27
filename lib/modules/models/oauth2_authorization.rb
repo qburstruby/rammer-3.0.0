@@ -37,6 +37,8 @@ Process each oauth api requests for required results.
         expected_response,response_message = Oauth2Client.register(params)
       when "request_token"
         expected_response,response_message = Oauth2Client.process_request(params,env,"code")
+      when "authorize"
+        expected_response,response_message = Oauth2Client.process_request(params,env,"authorize")
       when "access_token"
         expected_response,response_message = Oauth2Client.process_request(params,env,"token")
       when "token"

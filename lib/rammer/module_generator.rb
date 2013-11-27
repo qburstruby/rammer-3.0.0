@@ -121,7 +121,7 @@ Checks whether the module is already mounted and if not then configures for moun
 Function to copy the module of interest to project location.
 =end
     def copy_module		
-      src = "#{gem_path}/lib/template/#{module_name}_apis.rb"
+      src = "#{gem_path}/lib/modules/#{module_name}/#{module_name}_apis.rb"
       dest = "#{target_dir}/app/apis/#{project_name}/modules"
       presence = File.exists?("#{dest}/#{module_name}_apis.rb")? true : false
       FileUtils.mkdir dest unless File.exists?(dest)
@@ -134,16 +134,17 @@ Function to copy the module of interest to project location.
  Function to create the necessary migrations and models. 
 =end
     def create_migrations_and_models
-      src = "#{gem_path}/lib/template"
+      src = "#{gem_path}/lib/modules/migrations"
       dest = "#{target_dir}/db/migrate"
       copy_files(src,dest,AUTH_MIGRATE)
       if module_name == "oauth"
         copy_files(src,dest,OAUTH_MIGRATE)
       end
+      src_path = "#{gem_path}/lib/modules/models"
       dest_path = "#{target_dir}/app/models"   
-      copy_files(src,dest_path,AUTH_MODELS)
+      copy_files(src_path,dest_path,AUTH_MODELS)
       if module_name == "oauth"
-        copy_files(src,dest_path,OAUTH_MODELS)
+        copy_files(src_path,dest_path,OAUTH_MODELS)
       end
     end
 
@@ -188,7 +189,7 @@ Function to add the module dependency gems to project Gemfile.
         f.write("gem 'multi_json'\ngem 'oauth2'\ngem 'songkick-oauth2-provider'\ngem 'ruby_regex'\ngem 'oauth'\n")
       end
       $stdout.puts "\e[1;35m \tGemfile\e[0m\tgem 'multi_json'\n\t\tgem 'oauth2'
-                   \t\tgem 'songkick-oauth2-provider'\n\t\tgem 'ruby_regex'\n\t\tgem 'oauth'\n"
+\t\tgem 'songkick-oauth2-provider'\n\t\tgem 'ruby_regex'\n\t\tgem 'oauth'\n"
       $stdout.puts "\e[1;32m \trun\e[0m\tbundle install"
       system("bundle install")
     end
@@ -225,11 +226,11 @@ Notification for oauth module api functionality access.
 =end
     def oauth_message
       $stdout.puts "\e[33m
-                    In app/apis/<APP_NAME>/modules/oauth_apis.rb
-                    Specify redirection url to the respective authorization page into 'redirect_to_url'
-                    and uncomment the code to enable /oauth/authorize endpoint functionality.
-                    
-                    \e[0m"
+In app/apis/<APP_NAME>/modules/oauth_apis.rb
+Specify redirection url to the respective authorization page into 'redirect_to_url'
+and uncomment the code to enable /oauth/authorize endpoint functionality.
+
+\e[0m"
     end
   end
 end

@@ -38,7 +38,7 @@ Generator class for creating application basic folder structure
   class RammerGenerator
     attr_accessor :project_name, :target_dir, :module_name, :gem_path, :valid_name
     BASE_DIR = ['app', 'app/apis', 'config', 'db', 'db/migrate', 'app/models']          
-    TEMPLATE_FILES = ['Gemfile','Gemfile.lock','Procfile','Rakefile','server.rb', 'tree.rb']
+    COMMON_RAMMER_FILES = ['Gemfile','Gemfile.lock','Procfile','Rakefile','server.rb', 'tree.rb']
     RESERVED_WORDS = ['rammer', 'viber', 'test', 'lib', 'template', 'authorization', 'authentication', 'app', 'apis', 'models', 'migrate', 'oauth', 'oauth2']
 
 =begin
@@ -142,8 +142,8 @@ Function to configure the Goliath server.
 Function to copy the template files project location.
 =end
     def copy_files_to_target
-      TEMPLATE_FILES.each do |file|
-        source = File.join("#{gem_path}/lib/template/",file)
+      COMMON_RAMMER_FILES.each do |file|
+        source = File.join("#{gem_path}/lib/modules/common/",file)
         FileUtils.cp(source,"#{project_name}")
         $stdout.puts "\e[1;32m \tcreate\e[0m\t#{file}"
       end
@@ -153,7 +153,7 @@ Function to copy the template files project location.
 Creates api modules, required files and configures the server with respect to new application.
 =end
     def copy_files_to_dir(file,destination)
-      FileUtils.cp("#{gem_path}/lib/template/#{file}","#{project_name}/#{destination}")
+      FileUtils.cp("#{gem_path}/lib/modules/common/#{file}","#{project_name}/#{destination}")
       $stdout.puts "\e[1;32m \tcreate\e[0m\t#{destination}/#{file}"
     end
   end
