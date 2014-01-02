@@ -1,5 +1,38 @@
 #!/usr/bin/env ruby
 require 'rammer'
 
-generator = Rammer::RammerGenerator.new(*ARGV)
-generator.run 
+def options_message
+  STDOUT.puts <<-EOF
+Please provide command options
+
+Usage:
+  rammer generate/g scaffold [scaffold_name]
+EOF
+end
+
+def validate_options
+  scaffold_generator = true
+  case ARGV[1]
+  when 'scaffold'
+    unless ARGV[2].nil? 
+      target_dir = Dir.pwd.split('/',Dir.pwd.count('/')+1).last
+      options = { :project_name => target_dir, :scaffold_name => ARGV[2] }
+      scaffold_generator = Rammer::ScaffoldGenerator.new(options)
+      scaffold_generator.run 
+    else
+      options_message
+    end
+  else
+    options_message
+  end
+end
+
+case ARGV[0]
+when 'g', 'generate'
+  validate_options
+when nil
+  $stdout.puts "\e[1;31mError:\e[0m Please specify an application name."
+else
+  generator = Rammer::RammerGenerator.new(*ARGV)
+  generator.run 
+end

@@ -25,10 +25,25 @@
 **************************************************************************
 =end
 
-require "rammer/rammer_generator"
-require "rammer/module_generator"
-require "rammer/scaffold_generator"
+require "rammer/version"
+require 'fileutils'
+
+$gem_file_name = "rammer-"+Rammer::VERSION
 
 module Rammer
-end
+	class ScaffoldGenerator
+    attr_accessor :scaffold_name, :project_name, :gem_path
 
+    def initialize(options)
+      @module_name = options[:scaffold_name]
+      @project_name = options[:project_name]
+      path = `gem which rammer`
+      @gem_path = path.split($gem_file_name,2).first + "/" + $gem_file_name
+    end
+
+    def run 
+      # FileUtils.mkdir @module_name
+      # $stdout.puts "\e[1;32m \tcreate\e[0m\t#{@module_name}"
+    end
+  end
+end

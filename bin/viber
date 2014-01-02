@@ -17,7 +17,7 @@ def options_message
 Please include module name
 
 Usage:
-  viber module #{ARGV[1]}
+  viber module #{ARGV[1]} [options]
 
   options:
     authentication 
@@ -62,7 +62,7 @@ when "module"
 Please provide command options
 
 Usage:
-  viber module 
+  viber module [options]
 
   options:
     -p,-plugin      :Plugs in rammer specified modules. 

@@ -39,8 +39,7 @@ class TestRammerRootStructure < Test::Unit::TestCase
   def test_generator_directory_name
     Dir.chdir("#{$test_file_root}")
     dir_path = Dir.pwd
-    generator = Rammer::RammerGenerator.new(" ")
-    generator.run
+    $stdout.puts `rammer `
     assert_equal(false, File.directory?("#{dir_path}/ "))
   end
 

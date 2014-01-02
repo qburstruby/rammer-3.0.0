@@ -2,6 +2,7 @@ lib/rammer.rb
 lib/rammer/version.rb
 lib/rammer/rammer_generator.rb
 lib/rammer/module_generator.rb
+lib/rammer/scaffold_generator.rb
 lib/modules/migrations/01_create_users.rb
 lib/modules/migrations/02_create_sessions.rb
 lib/modules/migrations/03_create_owners.rb
