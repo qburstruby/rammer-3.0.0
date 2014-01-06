@@ -27,6 +27,7 @@
 
 require "rammer/version"
 require 'fileutils'
+require_relative 'reserved_words'
 
 $gem_file_name = "rammer-"+Rammer::VERSION
 
@@ -36,10 +37,7 @@ module Rammer
 Generator class for creating application basic folder structure
 =end
   class RammerGenerator
-    attr_accessor :project_name, :target_dir, :module_name, :gem_path, :valid_name
-    BASE_DIR = ['app', 'app/apis', 'config', 'db', 'db/migrate', 'app/models']          
-    COMMON_RAMMER_FILES = ['Gemfile','Gemfile.lock','Procfile','Rakefile','server.rb', 'tree.rb']
-    RESERVED_WORDS = ['rammer', 'viber', 'test', 'lib', 'template', 'authorization', 'authentication', 'app', 'apis', 'models', 'migrate', 'oauth', 'oauth2']
+    attr_accessor :project_name, :target_dir, :module_name, :gem_path, :valid_name 
 
 =begin
 Initiliazes the following attributes : 
@@ -73,7 +71,8 @@ Creates a basic folder structure with required files and configuration setup.
         setup_api_module
         copy_files_to_dir 'application.rb','config'
         copy_files_to_dir 'database.yml','config'
-        $stdout.puts "\e[33mRun `bundle install` to install missing gems.\e[0m"
+        $stdout.puts "\e[1;32m \trun\e[0m\tbundle install"
+        system("bundle install")
       else 
         unless !@valid_name
           $stdout.puts "\e[1;31mError:\e[0m The directory #{@project_name} already exists, aborting. Maybe move it out of the way before continuing."

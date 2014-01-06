@@ -27,6 +27,7 @@
 
 require "rammer/version"
 require 'fileutils'
+require_relative 'reserved_words'
 
 $gem_file_name = "rammer-"+Rammer::VERSION
 
@@ -37,10 +38,6 @@ and the runs bundle install.
 =end
   class ModuleGenerator
     attr_accessor :target_dir, :project_name, :module_class, :module_name, :gem_path, :action
-    AUTH_MIGRATE = ['01_create_users.rb','02_create_sessions.rb']
-    OAUTH_MIGRATE = ['03_create_owners.rb', '04_create_oauth2_authorizations.rb', '05_create_oauth2_clients.rb']
-    AUTH_MODELS = ['user.rb', 'session.rb', 'oauth2_authorization.rb']
-    OAUTH_MODELS = ['oauth2_client.rb', 'owner.rb']
     
 =begin
 Initiliazes the following attributes : 

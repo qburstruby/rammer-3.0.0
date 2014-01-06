@@ -15,8 +15,9 @@ def validate_options
   case ARGV[1]
   when 'scaffold'
     unless ARGV[2].nil? 
+      argv = ARGV.drop(3)
       target_dir = Dir.pwd.split('/',Dir.pwd.count('/')+1).last
-      options = { :project_name => target_dir, :scaffold_name => ARGV[2] }
+      options = { :project_name => target_dir, :scaffold_name => ARGV[2], :arguments => argv}
       scaffold_generator = Rammer::ScaffoldGenerator.new(options)
       scaffold_generator.run 
     else
