@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'rammer'
 
+#Validates command line arguments.
 def parse_options
   case ARGV[1]
   when "-p", "-plugin"
@@ -12,6 +13,7 @@ def parse_options
   end
 end
 
+#Returns usage message
 def options_message
   STDOUT.puts <<-EOF
 Please include module name
@@ -26,6 +28,7 @@ Usage:
 EOF
 end
 
+#Builds parameters and invokes the generator.
 def execute(module_name,action)
   target_dir = Dir.pwd.split('/',Dir.pwd.count('/')+1).last
   name = target_dir.split('_').map(&:capitalize)*''
@@ -43,6 +46,7 @@ def execute(module_name,action)
   module_generator.run
 end
 
+#Execution initiates here.
 case ARGV[0]
 when "module"
   if parse_options

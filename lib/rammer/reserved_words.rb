@@ -1,16 +1,3 @@
-DATA_TYPES = [  'primary_key', 
-                'string', 
-                'text', 
-                'integer', 
-                'float', 
-                'decimal', 
-                'datetime', 
-                'timestamp', 
-                'time', 
-                'date', 
-                'binary', 
-                'boolean'
-			       ]
 RESERVED_WORDS = [  'rammer', 
 					          'viber', 
 					          'test', 
@@ -23,7 +10,8 @@ RESERVED_WORDS = [  'rammer',
           					'models', 
           					'migrate', 
           					'oauth', 
-          					'oauth2'
+          					'oauth2',
+                    'scaffold'
 				          ]
 AUTH_MIGRATE = [  '01_create_users.rb',
 				          '02_create_sessions.rb'

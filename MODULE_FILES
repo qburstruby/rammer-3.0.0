@@ -27,6 +27,7 @@ lib/modules/common/tree.rb
 lib/modules/models/user.rb
 lib/modules/scaffold/model.rb
 lib/modules/scaffold/migration.rb
+lib/modules/scaffold/base_apis.rb
 test/helper.rb
 test/test_rammer_root_structure.rb
 test/test_viber_module_plugin.rb

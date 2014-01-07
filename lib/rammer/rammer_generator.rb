@@ -72,6 +72,7 @@ Creates a basic folder structure with required files and configuration setup.
         copy_files_to_dir 'application.rb','config'
         copy_files_to_dir 'database.yml','config'
         $stdout.puts "\e[1;32m \trun\e[0m\tbundle install"
+        Dir.chdir("#{@project_name}")
         system("bundle install")
       else 
         unless !@valid_name

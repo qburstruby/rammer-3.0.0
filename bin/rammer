@@ -1,15 +1,17 @@
 #!/usr/bin/env ruby
 require 'rammer'
 
+#Returns usage message
 def options_message
   STDOUT.puts <<-EOF
 Please provide command options
 
 Usage:
-  rammer generate/g scaffold [scaffold_name]
+  rammer generate/g scaffold [scaffold_name] [field_name:type]
 EOF
 end
 
+#Validates the command line arguments for invoking generators.
 def validate_options
   scaffold_generator = true
   case ARGV[1]
@@ -28,6 +30,7 @@ def validate_options
   end
 end
 
+#Execution initiates here.
 case ARGV[0]
 when 'g', 'generate'
   validate_options
