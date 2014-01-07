@@ -61,13 +61,15 @@ class TestRammerRootStructure < Test::Unit::TestCase
   end
 
   def test_generator_root_directory_exisiting
+    Dir.chdir("#{$test_file_root}")
     dir_path = Dir.pwd
     generator = Rammer::RammerGenerator.new("#{$test_file}")
     generator.run
     assert_equal(true, File.directory?("#{dir_path}/#{$test_file}"))
   end
 
-  def test_generator_root_folder_structure    
+  def test_generator_root_folder_structure   
+    Dir.chdir("#{$test_file_root}") 
     dir_path = Dir.pwd 
     DIR.each do |dir| 
       assert_equal(true, File.directory?("#{dir_path}/#{$test_file}/#{dir}"))
