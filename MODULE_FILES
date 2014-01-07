@@ -29,9 +29,10 @@ lib/modules/scaffold/model.rb
 lib/modules/scaffold/migration.rb
 lib/modules/scaffold/base_apis.rb
 test/helper.rb
-test/test_rammer_root_structure.rb
-test/test_viber_module_plugin.rb
-test/test_viber_module_unplug.rb
+test/hierarchy/test_rammer_root_structure.rb
+test/scaffold/test_scaffold_generator.rb
+test/viber/test_viber_module_plugin.rb
+test/viber/test_viber_module_unplug.rb
 Gemfile
 LICENSE.txt
 README.md

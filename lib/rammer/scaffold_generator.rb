@@ -69,12 +69,14 @@ Generates the model file with CRED functionality.
     def create_model_file
       dir = "/app/models/#{@scaffold_name}.rb"
       unless File.exists?(File.join(Dir.pwd,dir))
+        File.join(Dir.pwd,dir)
         source = "#{@gem_path}/lib/modules/scaffold/model.rb"
         FileUtils.cp(source,File.join(Dir.pwd,dir))
         config_model
         $stdout.puts "\e[1;32m \tcreate\e[0m\t#{dir}"
       else
         $stdout.puts "\e[1;31mError:\e[0m Model named #{@scaffold_name} already exists, aborting."
+        exit
       end
     end
 
@@ -113,7 +115,7 @@ Configures the migration file with the required user input.
         @attributes << value.split(':').first 
         @data_types << value.split(':').last 
       end
-      
+
       attribute_data_types = @data_types.reverse
       @attributes.reverse.each_with_index do |value,index|
         add_attributes(source, value, attribute_data_types[index])  
