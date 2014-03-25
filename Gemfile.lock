@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rammer (2.0.0)
+    rammer (3.0.0)
 
 GEM
   remote: https://rubygems.org/
