@@ -47,6 +47,10 @@ Oauth
 * token 			: "Returns bearer token to registered third party clients."
 * invalidate_token 	: "Invalidated the issued bearer token."
 
+To generate a scaffold structure in rammer use the command:
+
+	$ rammer g/generate scaffold <scaffold_name> <field_name:type>
+
 ## Wiki Link
 
 For further details visit our wiki link :
