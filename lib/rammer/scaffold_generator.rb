@@ -38,7 +38,7 @@ Generator class for scaffolding
 =end
 	class ScaffoldGenerator
     attr_accessor :scaffold_name, :project_name, :gem_path, :model_class, :attributes, :data_types, 
-                  :arguments, :project_class
+                  :arguments, :project_class, :valid
 
 =begin
 Initiliazes the basic attributes required for scaffolding.
@@ -52,6 +52,7 @@ Initiliazes the basic attributes required for scaffolding.
       @attributes, @data_types = [],[]
       path = `gem which rammer`
       @gem_path = path.split($gem_file_name,2).first + $gem_file_name
+      @valid = false
     end
 
 =begin
@@ -59,8 +60,8 @@ Initiates scaffolding functionality by creating model, migration and api files.
 =end
     def run 
       create_model_file
-      create_migration
-      enable_apis
+      create_migration if @valid==true
+      enable_apis if @valid==true
     end
 
 =begin
@@ -73,10 +74,10 @@ Generates the model file with CRED functionality.
         source = "#{@gem_path}/lib/modules/scaffold/model.rb"
         FileUtils.cp(source,File.join(Dir.pwd,dir))
         config_model
+        @valid = true
         $stdout.puts "\e[1;32m \tcreate\e[0m\t#{dir}"
       else
         $stdout.puts "\e[1;31mError:\e[0m Model named #{@scaffold_name} already exists, aborting."
-        exit
       end
     end
 
