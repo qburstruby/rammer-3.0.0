@@ -1,6 +1,6 @@
 <img height="100" width="250" src="https://raw.github.com/qburstruby/rammer/master/rammer_logo.png">
 
-[![Gem Version](https://badge.fury.io/rb/rammer.png)](http://badge.fury.io/rb/rammer)  [![Build Status](https://travis-ci.org/qburstruby/rammer-2.0.0.png?branch=master)](https://travis-ci.org/qburstruby/rammer-2.0.0)
+[![Gem Version](https://badge.fury.io/rb/rammer.png)](http://badge.fury.io/rb/rammer)  [![Build Status](https://travis-ci.org/qburstruby/rammer-3.0.0.svg?branch=master)](https://travis-ci.org/qburstruby/rammer-2.0.0)
 
 Rammer is a framework dedicated to build high performance Async API servers on top of non-blocking (asynchronous) Ruby web server called Goliath. Rammer APIs are designed on top of REST-like API micro-framework Grape. Rammer is modular and integrates a powerful CLI called Viber to plug in and out its modules.
 
